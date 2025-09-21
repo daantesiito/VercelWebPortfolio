@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Dante Puddu' }],
   creator: 'Dante Puddu',
   openGraph: {
-    title: 'Dante Puddu — Pentester Junior',
+    title: 'Dante Puddu — Portfolio',
     description: 'Portfolio de Dante Puddu, Pentester Junior. Explora mis proyectos, juegos y certificaciones en ciberseguridad.',
     url: 'https://dante-puddu.vercel.app',
     siteName: 'Dante Puddu Portfolio',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: '/images/og-image.webp',
         width: 1200,
         height: 630,
-        alt: 'Dante Puddu — Pentester Junior',
+        alt: 'Dante Puddu — Portfolio',
       },
     ],
     locale: 'es_ES',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Dante Puddu — Pentester Junior',
+    title: 'Dante Puddu — Portfolio',
     description: 'Portfolio de Dante Puddu, Pentester Junior. Explora mis proyectos, juegos y certificaciones en ciberseguridad.',
     images: ['/images/og-image.webp'],
   },

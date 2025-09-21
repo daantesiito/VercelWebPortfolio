@@ -1,0 +1,454 @@
+:root {
+    --col-bg: #e5d4ff;
+    --col-bg-light: #e0e0e0;
+    --col-bg-lighter: #c096ff;
+    --col-primary: #9146ff;
+    --col-primary-dark: #634e83;
+    --col-primary-light: #c096ff;
+    --col-shadow: rgba(0, 0, 0, 0.25);
+    --col-white: #fff;
+    --col-correct: #6aaa64;
+    --col-present: #c9b458;
+    --col-absent: #787c7e;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--col-bg);
+    color: var(--col-primary-dark);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    color: var(--col-primary);
+    font-size: 48px;
+    font-weight: 600;
+    margin: 20px 0;
+    margin-top: 50px;
+}
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(5, 60px); /* Este valor se actualizará dinámicamente desde JavaScript */
+    gap: 15px;
+    justify-content: center;
+}
+
+.tile {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    font-weight: bold;
+    border: 2px solid var(--col-primary-dark);
+    background-color: var(--col-white);
+    box-shadow: 0 4px 8px var(--col-shadow);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.tile.correct {
+    background-color: var(--col-correct);
+    color: var(--col-white);
+    transform: scale(1.1);
+}
+
+.tile.present {
+    background-color: var(--col-present);
+    color: var(--col-white);
+    transform: scale(1.1);
+}
+
+.tile.absent {
+    background-color: var(--col-absent);
+    color: var(--col-white);
+    transform: scale(1.1);
+}
+
+#keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.key-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.key {
+    width: 50px;
+    height: 50px;
+    background-color: var(--col-bg-light);
+    text-align: center;
+    line-height: 50px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px var(--col-shadow);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.key:hover {
+    background-color: var(--col-primary-light);
+    transform: scale(1.1);
+}
+
+.special-key {
+    width: 80px;
+    background-color: var(--col-primary);
+    color: var(--col-white);
+}
+
+.special-key:hover {
+    background-color: var(--col-primary-light);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+#result {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.post-game {
+    display: none; 
+    text-align: center;
+    margin-top: 0px;
+}
+
+.post-game.visible {
+    display: block !important;
+}
+
+.correct {
+    background-color: var(--col-correct);
+    color: white;
+}
+
+.present {
+    background-color: var(--col-present);
+    color: white;
+}
+
+.absent {
+    background-color: var(--col-absent);
+    color: white;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: var(--col-white);
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid var(--col-primary-dark);
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--col-shadow);
+}
+
+.close {
+    color: var(--col-primary-dark);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--col-primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.social-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: var(--col-white);
+    font-weight: bold;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.github {
+    background-color: #333;
+}
+
+.github:hover {
+    background-color: #555;
+}
+
+.cafecito {
+    background-color: #0077b6;
+}
+
+.cafecito:hover {
+    background-color: #0096c7;
+}
+
+.instagram {
+    background-color: #e1306c;
+}
+
+.instagram:hover {
+    background-color: #fd1d1d;
+}
+
+.twitch {
+    background-color: #6441a5;
+}
+
+.twitch:hover {
+    background-color: #9147ff;
+}
+
+.email {
+    background-color: #d44638;
+}
+
+.email:hover {
+    background-color: #c23321;
+}
+
+.discord {
+    background-color: #7289da;
+}
+
+.discord:hover {
+    background-color: #5a6fb1;
+}
+
+.emote {
+    position: absolute;
+    bottom: 100vh;
+    width: 102px;
+    height: 56px;
+    pointer-events: none;
+    z-index: 1;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-100vh);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh);
+        opacity: 0.1;
+    }
+}
+
+#emote-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+}
+
+#postGameStats {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+
+#postGameStats h2 {
+    color: var(--col-primary);
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+#userInfo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#userInfo img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+#userInfo span {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--col-primary-dark);
+}
+
+#loginWithTwitchButton, #instructionsToggleButton {
+    padding: 10px 20px;
+    background-color: #6441a5;
+    color: var(--col-white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+#loginWithTwitchButton:hover {
+    background-color: #9147ff;
+}
+
+#instructionsToggleButton {
+    margin-top: 60px;
+    margin-left: 180px;
+}
+
+#instructionsContainer {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    max-width: 300px;
+}
+
+#instructionsModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#instructionsModal .modal-content {
+    background-color: var(--col-white);
+    margin: 15% auto;
+    padding: 30px; /* Aumenta el padding para evitar superposición */
+    border: 1px solid var(--col-primary-dark);
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px var(--col-shadow);
+    position: relative; /* Asegura que el contenido del modal sea el contenedor de referencia para la "X" */
+}
+
+#instructionsModal .close {
+    color: var(--col-primary-dark);
+    position: absolute; /* Posiciona la "X" de forma absoluta */
+    top: 10px; /* Ajusta la posición superior */
+    right: 10px; /* Ajusta la posición derecha */
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#instructionsModal .close:hover,
+#instructionsModal .close:focus {
+    color: var(--col-primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.instruction-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+@media (max-width: 768px) {
+    #instructionsToggleButton {
+        display: none;
+    }
+
+    /* Otros ajustes responsivos para móvil */
+    #board {
+        grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        gap: 10px;
+    }
+
+    .tile {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+
+    #keyboard .key {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 36px;
+    }
+}

@@ -6,9 +6,9 @@ export type ContactInfo = {
 }
 
 export const contactInfo: ContactInfo = {
-  email: "dante@example.com", // TODO: Reemplazar con email real
-  instagram: "https://instagram.com/daantesiito", // TODO: Reemplazar con Instagram real
-  telegram: "@daantesiito", // TODO: Reemplazar con Telegram real
+  email: "adantepuddu@gmail.com",
+  instagram: "https://instagram.com/dante_puddu",
+  telegram: "@daantesito",
   github: "https://github.com/daantesiito"
 };
 

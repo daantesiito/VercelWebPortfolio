@@ -7,12 +7,12 @@ export type Certification = {
 
 export const certifications: Certification[] = [
   {
-    id: "ejemplo-cert",
-    title: "Certificación de Ejemplo",
-    image: "/images/cert-placeholder.svg",
-    href: "https://example.com/cert"
+    id: "CIHE",
+    title: "Certificación Introduccion al Hacking Ético",
+    image: "/images/CIHE.jpg",
+    href: "https://www.mastermind.ac/certificates/d47co03d6c"
   }
-  // TODO: Agregar más certificaciones aquí
+  // Agregar más certificaciones
   // {
   //   id: "otra-cert",
   //   title: "Otra Certificación",

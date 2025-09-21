@@ -11,41 +11,49 @@ export const projects: Project[] = [
   {
     id: "suika",
     title: "Suika Game",
-    description: "Juego de física inspirado en Suika Game donde combinas frutas para crear frutas más grandes. Desarrollado con HTML5 Canvas y JavaScript.",
-    image: "/images/suika.svg",
+    description: "Juego de física inspirado en Suika Game donde combinas cabezas de streamers para crear otras más grandes. Desarrollado con HTML, CSS y JavaScript.",
+    image: "/images/suikaStreamers.jpg",
     href: "/games/suika",
     kind: "game"
   },
   {
     id: "2048",
     title: "2048",
-    description: "Clásico juego de números donde combinas tiles para alcanzar el número 2048. Implementado con JavaScript vanilla y CSS Grid.",
-    image: "/images/2048.svg",
+    description: "Juego de combinar fichas para alcanzar la ficha más alta. Inspirado en el juego 2048. Implementado con HTML, CSS y JavaScript.",
+    image: "/images/2048.jpg",
     href: "/games/2048",
     kind: "game"
   },
   {
     id: "twitchdle",
     title: "Twitchdle",
-    description: "Juego de adivinanzas inspirado en Wordle pero con streamers de Twitch. Adivina el streamer basándote en pistas visuales.",
-    image: "/images/twitchdle.svg",
+      description: "Juego de adivinanza inspirado en Wordle pero con streamers de Twitch/Kick. Adivina el streamer descubriendo letras con palabras. Implementado con HTML, CSS y JavaScript.",
+    image: "/images/twitchdle.jpg",
     href: "/games/twitchdle",
     kind: "game"
   },
   {
     id: "desafioalpasto",
     title: "Desafío Al Pasto",
-    description: "Proyecto web interactivo desarrollado para el desafío Al Pasto. Incluye animaciones y efectos visuales modernos.",
-    image: "/images/desafioalpasto.svg",
+    description: "Proyecto web de una tabla de posiciones para el desafío 'Al Pasto'. Es un desafio de Formula 1 creado por mi para jugar en mi casa con invitados.",
+    image: "/images/desafioalpasto.jpg",
     href: "https://daantesiito.github.io/desafioalpasto",
     kind: "external"
   },
   {
     id: "ttstreamersarg",
     title: "TT Streamers Arg",
-    description: "Aplicación para seguir y descubrir streamers argentinos en Twitch. Incluye filtros, búsqueda y estadísticas en tiempo real.",
-    image: "/images/ttstreamersarg.svg",
+    description: "Aplicación para agregar en OBS y que los viewers pueda usar voces con inteligencia artificial personalizadas.",
+    image: "/images/ttsStreamersArg.jpg",
     href: "https://github.com/daantesiito/TTStreamersArg",
+    kind: "external"
+  },
+  {
+    id: "bauloSpeedrunWinterChallenge",
+    title: "Baulo Speedrun Winter Challenge",
+    description: "Trabajé con Baulo para hacer un evento de speedrun de minecraft en vacaciones de invierno y transmitirlo en Kick.",
+    image: "/images/baulowinterspeedrunchallenge.jpg",
+    href: "https://baulo-speedrun-challenge.vercel.app/",
     kind: "external"
   }
 ];

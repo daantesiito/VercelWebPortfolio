@@ -14,7 +14,7 @@ export default function ContactList() {
     },
     {
       label: 'Instagram',
-      value: '@daantesiito',
+      value: '@dante_puddu',
       href: contactInfo.instagram,
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
