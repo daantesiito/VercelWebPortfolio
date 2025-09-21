@@ -10,14 +10,20 @@ export default function GamesPage() {
     <>
       {/* Juegos Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl sm:text-6xl font-bold text-white mb-4 flex items-center justify-center mb-20">
+        <h1 className="text-4xl sm:text-6xl font-bold text-white mb-12 flex items-center justify-center mb-20">
         Mis Juegos
         </h1>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {games.map((game) => (
               <div key={game.id} className="group relative bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/10">
-                <Link href={game.href} className="block">
+                <a
+                  href={game.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                  aria-label={`Abrir ${game.title} en nueva pestaña`}
+                >
                   <div className="aspect-video relative overflow-hidden">
                     <Image
                       src={game.image}
@@ -41,7 +47,7 @@ export default function GamesPage() {
                       {game.description}
                     </p>
                   </div>
-                </Link>
+                </a>
               </div>
             ))}
           </div>

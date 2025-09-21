@@ -37,24 +37,17 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     </div>
   );
 
-  if (isExternal) {
-    return (
-      <a
-        href={project.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-        aria-label={`Abrir ${project.title} en nueva pestaña`}
-      >
-        {cardContent}
-      </a>
-    );
-  }
-
+  // Todos los proyectos se abren en nueva pestaña
   return (
-    <Link href={project.href} className="block">
+    <a
+      href={project.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+      aria-label={`Abrir ${project.title} en nueva pestaña`}
+    >
       {cardContent}
-    </Link>
+    </a>
   );
 }
 

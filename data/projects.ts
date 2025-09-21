@@ -13,7 +13,7 @@ export const projects: Project[] = [
     title: "Suika Game",
     description: "Juego de física inspirado en Suika Game donde combinas cabezas de streamers para crear otras más grandes. Desarrollado con HTML, CSS y JavaScript.",
     image: "/images/suikaStreamers.jpg",
-    href: "/games/suika",
+    href: "https://daantesiito.github.io/suika/",
     kind: "game"
   },
   {
@@ -21,7 +21,7 @@ export const projects: Project[] = [
     title: "2048",
     description: "Juego de combinar fichas para alcanzar la ficha más alta. Inspirado en el juego 2048. Implementado con HTML, CSS y JavaScript.",
     image: "/images/2048.jpg",
-    href: "/games/2048",
+    href: "https://daantesiito.github.io/2048/",
     kind: "game"
   },
   {
@@ -29,7 +29,7 @@ export const projects: Project[] = [
     title: "Twitchdle",
       description: "Juego de adivinanza inspirado en Wordle pero con streamers de Twitch/Kick. Adivina el streamer descubriendo letras con palabras. Implementado con HTML, CSS y JavaScript.",
     image: "/images/twitchdle.jpg",
-    href: "/games/twitchdle",
+    href: "https://daantesiito.github.io/twitchdle/",
     kind: "game"
   },
   {
@@ -57,10 +57,3 @@ export const projects: Project[] = [
     kind: "external"
   }
 ];
-
-// Mapeo de slugs a URLs para los juegos
-export const gameUrls: Record<string, string> = {
-  suika: "https://daantesiito.github.io/suika/",
-  "2048": "https://daantesiito.github.io/2048/",
-  twitchdle: "https://daantesiito.github.io/twitchdle/"
-};
