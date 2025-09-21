@@ -1,0 +1,15 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#009AFE"/>
+  <rect x="50" y="50" width="300" height="200" rx="10" fill="#2D3748"/>
+  <rect x="80" y="80" width="60" height="40" rx="5" fill="#4A5568"/>
+  <rect x="160" y="80" width="60" height="40" rx="5" fill="#4A5568"/>
+  <rect x="240" y="80" width="60" height="40" rx="5" fill="#4A5568"/>
+  <rect x="80" y="140" width="60" height="40" rx="5" fill="#4A5568"/>
+  <rect x="160" y="140" width="60" height="40" rx="5" fill="#4A5568"/>
+  <rect x="240" y="140" width="60" height="40" rx="5" fill="#4A5568"/>
+  <text x="200" y="40" text-anchor="middle" fill="white" font-family="Arial" font-size="20" font-weight="bold">Desafío Al Pasto</text>
+  <text x="200" y="220" text-anchor="middle" fill="white" font-family="Arial" font-size="14">Proyecto Web Interactivo</text>
+</svg>
+
+
+

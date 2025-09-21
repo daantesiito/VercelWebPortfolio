@@ -1,0 +1,12 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#090E14"/>
+  <rect x="50" y="50" width="1100" height="530" rx="20" fill="#2D3748" stroke="#009AFE" stroke-width="4"/>
+  <circle cx="300" cy="315" r="80" fill="#009AFE"/>
+  <text x="600" y="250" fill="white" font-family="Arial" font-size="48" font-weight="bold">Dante Puddu</text>
+  <text x="600" y="320" fill="#009AFE" font-family="Arial" font-size="32">Pentester Junior</text>
+  <text x="600" y="380" fill="#FE0000" font-family="Arial" font-size="24">Portfolio & Proyectos</text>
+  <text x="600" y="450" fill="white" font-family="Arial" font-size="18">Ciberseguridad • Desarrollo Web • Juegos</text>
+</svg>
+
+
+
