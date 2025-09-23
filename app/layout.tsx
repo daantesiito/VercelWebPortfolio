@@ -1,20 +1,19 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import Header from '@/components/Header';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Dante Puddu — Pentester Junior',
-  description: 'Portfolio de Dante Puddu, Pentester Junior. Explora mis proyectos, juegos y certificaciones en ciberseguridad.',
+  description: 'Portfolio de Dante Puddu, Pentester Junior. Explora mis proyectos, juegos y certificaciones.',
   keywords: ['Dante Puddu', 'Pentester', 'Ciberseguridad', 'Portfolio', 'Desarrollo Web', 'Juegos'],
   authors: [{ name: 'Dante Puddu' }],
   creator: 'Dante Puddu',
   openGraph: {
     title: 'Dante Puddu — Portfolio',
-    description: 'Portfolio de Dante Puddu, Pentester Junior. Explora mis proyectos, juegos y certificaciones en ciberseguridad.',
-    url: 'https://dante-puddu.vercel.app',
+    description: 'Portfolio de Dante Puddu, Pentester Junior. Explora mis proyectos, juegos y certificaciones.',
+    url: 'https://dantesito.dev',
     siteName: 'Dante Puddu Portfolio',
     images: [
       {
@@ -66,14 +65,8 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={inter.className}>
-        <Header />
-        <main className="pt-16">
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );
 }
-
-
-

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>2048</title>
+  <link href="style/main.css" rel="stylesheet" type="text/css">
+  <link rel="shortcut icon" href="logo.ico">
+  <link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
+  <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"> <!-- iPhone 5+ -->
+  <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x920.png"  media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)"> <!-- iPhone, retina -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <button id="loginWithTwitchButton">LOGIN CON TWITCH</button>
+  <div class="container">
+    <div class="theme-switcher">
+      <h5>Cambiar colores -> </h5>
+      <button id="themeSwitcherButton">TWITCH / KICK</button>
+    </div>
+    <div id="userInfo" class="hidden">
+      <img id="userAvatar" src="" alt="User Avatar" />
+      <span id="userName"></span>
+      <button id="btn-top">
+        <a href="https://twitch-bf66f.web.app/" target="_blank" rel="noopener noreferrer">TOP</a>
+      </button>
+      <button id="btn-guide">
+        <a href="#">GUIA</a>
+      </button>
+    </div>
+    <div class="heading">
+      <h1 class="title">2048</h1>
+      <div class="scores-container">
+        <div class="score-container">0</div>
+        <div class="best-container">0</div>
+      </div>
+    </div>
+
+    <div class="above-game">
+      <p class="game-intro">Juntá los EMOTES para conseguir <strong>la ficha del OMEGALUL</strong></p>
+      <a class="restart-button">Nuevo Juego</a>
+    </div>
+
+    <div class="game-container">
+      <div class="game-message">
+        <p></p>
+        <div class="lower">
+	        <a class="keep-playing-button">Continuar</a>
+          <a class="retry-button">Reintentar</a>
+        </div>
+      </div>
+
+      <div class="grid-container">
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+        <div class="grid-row">
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+          <div class="grid-cell"></div>
+        </div>
+      </div>
+      <div class="tile-container">
+      </div>
+    </div>
+    <p class="game-explanation">
+      <strong class="important">Como Jugar:</strong> Usá las <strong>flechas del teclado</strong> para mover las fichas. Cuando dos fichas con el mismo emote se tocan, <strong>se fusionan en una sola</strong>.
+    </p>
+    <div class="social-buttons">
+      <a href="https://github.com/daantesiito" target="_blank" class="social-button github"><i class="fab fa-github"></i></a>
+      <a href="https://cafecito.app/dantesiito" target="_blank" class="social-button cafecito"><i class="fas fa-coffee"></i></a>
+      <a href="https://www.instagram.com/dante_puddu/" target="_blank" class="social-button instagram"><i class="fab fa-instagram"></i></a>
+      <a href="https://www.twitch.tv/daantesiito" target="_blank" class="social-button twitch"><i class="fab fa-twitch"></i></a>
+      <a href="https://discordapp.com/users/326820001879162880" target="_blank" class="social-button discord"><i class="fab fa-discord"></i></a>
+    </div>
+  </div>
+
+  <div id="imageModal">
+    <button class="close">&times;</button>
+    <img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/guia.png?raw=true" alt="Guia">
+  </div>
+
+  <!-- Scripts de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script src="js/bind_polyfill.js"></script>
+  <script src="js/classlist_polyfill.js"></script>
+  <script src="js/animframe_polyfill.js"></script>
+  <script src="js/keyboard_input_manager.js"></script>
+  <script src="js/html_actuator.js"></script>
+  <script src="js/grid.js"></script>
+  <script src="js/tile.js"></script>
+  <script src="js/local_storage_manager.js"></script>
+  <script src="js/game_manager.js"></script>
+  <script src="js/application.js"></script>
+  <script src="js/theme_switcher.js"></script>
+  <script src="js/twitch.js"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PTK4PBJ1KG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-PTK4PBJ1KG');
+  </script>
+  <script>
+    // Deshabilitar el acceso a la consola (versión corregida)
+  (function() {
+    var _z = console;
+    Object.defineProperty(window, "console", {
+      get: function() {
+        if (_z && _z._commandLineAPI) {
+          throw "Acceso a la consola deshabilitado";
+        }
+        return _z;
+      },
+      set: function(val) {
+        _z = val;
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
