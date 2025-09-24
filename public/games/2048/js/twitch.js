@@ -31,19 +31,8 @@ if (!username) {
     container.classList.remove("hidden");
 }
 
-loginWithTwitchButton.addEventListener("click", () => {
-    const clientId = '9atac9btbos4bjh4qms4kawv2eiyyt';
-    const redirectUri = 'https://www.dantesito.dev/api/auth/callback/twitch';
-    //const redirectUri = 'http://localhost:3000/api/auth/callback/twitch';
-    const scope = 'user:read:email';
-    const responseType = 'token';
-
-    // Codificar la URL
-    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${scope}`;
-
-    // Redirigir a Twitch
-    window.location.href = twitchAuthUrl;
-});
+// Login con Twitch manejado por NextAuth.js
+// No necesitamos código personalizado aquí
 
 function handleTwitchAuth() {
     const hash = window.location.hash;
