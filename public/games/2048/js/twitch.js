@@ -44,7 +44,7 @@ function handleTwitchAuth() {
             fetch('https://api.twitch.tv/helix/users', {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Client-Id': '9atac9btbos4bjh4qms4kawv2eiyyt'
+                    'Client-Id': 'a4f56mmonqz9erz1kml6m0bpyaauza'
                 }
             })
             .then(response => response.json())
