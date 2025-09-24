@@ -33,7 +33,7 @@ if (!username) {
 
 loginWithTwitchButton.addEventListener("click", () => {
     const clientId = '9atac9btbos4bjh4qms4kawv2eiyyt';
-    const redirectUri = 'https://dantesito.dev/api/auth/callback/twitch';
+    const redirectUri = 'https://www.dantesito.dev/api/auth/callback/twitch';
     //const redirectUri = 'http://localhost:3000/api/auth/callback/twitch';
     const scope = 'user:read:email';
     const responseType = 'token';
