@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
               twitchId: profile.sub as string,
               twitchLogin: profile.preferred_username as string,
               displayName: profile.display_name || profile.preferred_username || user.name,
-              avatarUrl: profile.profile_image_url || profile.picture || user.image,
+              avatarUrl: profile.profile_image_url || user.image,
               updatedAt: new Date(),
             },
           })
