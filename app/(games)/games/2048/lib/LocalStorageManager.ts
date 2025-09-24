@@ -39,7 +39,7 @@ export class LocalStorageManager {
   localStorageSupported(): boolean {
     if (typeof window === 'undefined') return false;
 
-    const testKey = "test";
+    const testKey = "storage_test";
 
     try {
       const storage = window.localStorage;

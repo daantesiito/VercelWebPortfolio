@@ -42,15 +42,7 @@ export class KeyboardInputManager {
       38: 0, // Up
       39: 1, // Right
       40: 2, // Down
-      37: 3, // Left
-      75: 0, // Vim up
-      76: 1, // Vim right
-      74: 2, // Vim down
-      72: 3, // Vim left
-      87: 0, // W
-      68: 1, // D
-      83: 2, // S
-      65: 3  // A
+      37: 3  // Left
     };
 
     // Respond to direction keys
@@ -64,11 +56,6 @@ export class KeyboardInputManager {
           event.preventDefault();
           this.emit("move", mapped);
         }
-      }
-
-      // R key restarts the game
-      if (!modifiers && event.which === 82) {
-        this.restart(event);
       }
     });
 

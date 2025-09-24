@@ -66,49 +66,49 @@ HTMLActuator.prototype.addTile = function (tile) {
   // Replace text content with an image for specific tile values
   switch (tile.value) {
     case 2: 
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/FeelsWeirdMan-4x.png?raw=true" alt="2">';
+      inner.innerHTML = '<img src="./media/FeelsWeirdMan-4x.png" alt="2">';
       break;
     case 4:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/o7-4x.png?raw=true" alt="4">';
+      inner.innerHTML = '<img src="./media/o7-4x.png" alt="4">';
       break;
     case 8:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/sus-4x.png?raw=true" alt="8">';
+      inner.innerHTML = '<img src="./media/sus-4x.png" alt="8">';
       break;
     case 16:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/pfft-4x.png?raw=true" alt="16">';
+      inner.innerHTML = '<img src="./media/pfft-4x.png" alt="16">';
       break;
     case 32:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/CAUGHT-4x.png?raw=true" alt="32">';
+      inner.innerHTML = '<img src="./media/CAUGHT-4x.png" alt="32">';
       break;
     case 64:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/MAJ-4x.png?raw=true" alt="64">';
+      inner.innerHTML = '<img src="./media/MAJ-4x.png" alt="64">';
       break;
     case 128:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/monkaS-4x.png?raw=true" alt="128">';
+      inner.innerHTML = '<img src="./media/monkaS-4x.png" alt="128">';
       break;
     case 256:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/monkaW-4x.png?raw=true" alt="256">';
+      inner.innerHTML = '<img src="./media/monkaW-4x.png" alt="256">';
       break;
     case 512:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/ok-4x.png?raw=true" alt="512">';
+      inner.innerHTML = '<img src="./media/ok-4x.png" alt="512">';
       break;
     case 1024:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/POGGERS-4x.png?raw=true" alt="1024">';
+      inner.innerHTML = '<img src="./media/POGGERS-4x.png" alt="1024">';
       break;
     case 2048:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/OMEGALUL-4x.png?raw=true" alt="2048">';
+      inner.innerHTML = '<img src="./media/OMEGALUL-4x.png" alt="2048">';
       break;
     case 4096:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/Chadge-4x.png?raw=true" alt="4096">';
+      inner.innerHTML = '<img src="./media/Chadge-4x.png" alt="4096">';
       break;
     case 8192:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/dosecat-4x.png?raw=true" alt="8192">';
+      inner.innerHTML = '<img src="./media/dosecat-4x.png" alt="8192">';
       break;
     case 16384:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/Ratge-4x.png?raw=true" alt="16384">';
+      inner.innerHTML = '<img src="./media/Ratge-4x.png" alt="16384">';
       break;
     case 32768:
-      inner.innerHTML = '<img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/2048/media/PepeClown-4x.png?raw=true" alt="32768">';
+      inner.innerHTML = '<img src="./media/PepeClown-4x.png" alt="32768">';
       break;
     default:
       inner.textContent = tile.value;

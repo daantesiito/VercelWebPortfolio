@@ -21,7 +21,7 @@ export const projects: Project[] = [
     title: "2048",
     description: "Juego de combinar fichas para alcanzar la ficha más alta. Inspirado en el juego 2048. Implementado con HTML, CSS y JavaScript.",
     image: "/images/2048.jpg",
-    href: "https://daantesiito.github.io/2048/",
+    href: "https://dantesito.dev/games/2048/",
     kind: "game"
   },
   {

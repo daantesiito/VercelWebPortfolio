@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import Game2048 from './Game2048';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { getTopScores, getTopStreamerScores } from '@/lib/scores';
+import GameWithLeaderboard from './components/GameWithLeaderboard';
+import AuthButton from '@/components/AuthButton';
 import './styles.css';
+import './leaderboard.css';
 
 export const metadata: Metadata = {
   title: '2048 — dantesito.dev',
-  description: 'Juega al clásico juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
+  description: 'Jugá al juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
   keywords: ['2048', 'juego', 'twitch', 'emotes', 'dantesito.dev'],
   robots: {
     index: true,
@@ -12,7 +17,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: '2048 — dantesito.dev',
-    description: 'Juega al clásico juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
+    description: 'Jugá al juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
     url: 'https://dantesito.dev/games/2048',
     siteName: 'dantesito.dev',
     images: [
@@ -28,6 +33,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Game2048Page() {
-  return <Game2048 />;
+export default async function Game2048Page() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#e5d4ff' }}>
+        <div className="text-center flex flex-col items-center">
+          <h1 className="text-4xl font-bold mb-8" style={{ color: '#634e83' }}>2048</h1>
+          <p className="text-xl mb-8" style={{ color: '#634e83' }}>
+            Autorizá con twitch para jugar
+          </p>
+          <div className="flex justify-center">
+            <AuthButton callbackUrl="/games/2048" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const [topScores, streamerScores] = await Promise.all([
+    getTopScores('2048', 100), // Obtener hasta 100 scores globales
+    getTopStreamerScores('2048', 100) // Obtener hasta 100 scores de streamers
+  ]);
+
+  return <GameWithLeaderboard initialScores={topScores} initialStreamerScores={streamerScores} />;
 }

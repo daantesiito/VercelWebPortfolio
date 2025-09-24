@@ -32,9 +32,8 @@ if (!username) {
 }
 
 loginWithTwitchButton.addEventListener("click", () => {
-    const clientId = '9atac9btbos4bjh4qms4kawv2eiyyt';
+    const clientId = process.env.TWITCH_CLIENT_ID || 'your-twitch-client-id';
     const redirectUri = 'https://daantesiito.github.io/2048/';
-    //const redirectUri = 'http://localhost:8000/';
     const scope = 'user:read:email';
     const responseType = 'token';
 
@@ -80,7 +79,9 @@ function handleTwitchAuth() {
                 // Limpiar la URL para eliminar los parámetros después del #
                 history.replaceState(null, '', window.location.pathname);
             })
-            .catch(error => console.error('Error fetching Twitch user:', error));
+            .catch(error => {
+                // Error fetching Twitch user - silently fail
+            });
         }
     }
 }

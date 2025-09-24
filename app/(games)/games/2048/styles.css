@@ -226,8 +226,9 @@
   bottom: 0;
   left: 0;
   background: rgba(238, 228, 218, 0.5);
-  z-index: 100;
+  z-index: 1000;
   text-align: center;
+  pointer-events: auto;
   -webkit-animation: fade-in 800ms ease 1200ms;
   -moz-animation: fade-in 800ms ease 1200ms;
   animation: fade-in 800ms ease 1200ms;

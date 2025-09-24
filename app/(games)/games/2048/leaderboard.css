@@ -1,0 +1,200 @@
+/* Leaderboard styles that respond to game themes */
+
+/* Default Twitch theme */
+.leaderboard-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 240px;
+}
+
+.leaderboard-container h3 {
+  color: #8f7a66;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.leaderboard-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Custom scrollbar for Twitch theme */
+.leaderboard-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb {
+  background: #9146ff;
+  border-radius: 4px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+/* Firefox scrollbar */
+.leaderboard-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #9146ff #f1f1f1;
+}
+
+.leaderboard-item {
+  background: rgba(240, 240, 240, 0.8);
+  border-radius: 4px;
+  padding: 6px;
+  margin-bottom: 6px;
+  transition: background-color 0.2s;
+}
+
+.leaderboard-item:hover {
+  background: rgba(224, 224, 224, 0.8);
+}
+
+.leaderboard-rank {
+  background-color: #8f7a66;
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Top 3 special colors */
+.leaderboard-rank.rank-1 {
+  background-color: #ffd700; /* Oro */
+  color: #000;
+}
+
+.leaderboard-rank.rank-2 {
+  background-color: #c0c0c0; /* Plata */
+  color: #000;
+}
+
+.leaderboard-rank.rank-3 {
+  background-color: #cd7f32; /* Bronce */
+  color: #fff;
+}
+
+/* Top 3 scores special colors */
+.leaderboard-score.score-1 {
+  color: #ffd700; /* Oro */
+}
+
+.leaderboard-score.score-2 {
+  color: #c0c0c0; /* Plata */
+}
+
+.leaderboard-score.score-3 {
+  color: #cd7f32; /* Bronce */
+}
+
+/* Top 4+ use theme colors */
+.leaderboard-rank.rank-4-plus {
+  background-color: #9146ff; /* Twitch purple */
+  color: white;
+}
+
+.leaderboard-score {
+  color: #8f7a66;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Top 4+ scores use theme colors */
+.leaderboard-score.score-4-plus {
+  color: #9146ff; /* Twitch purple */
+}
+
+/* Kick theme styles */
+.game-2048.kick-theme .leaderboard-container {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e0e0e0; /* Quitar borde verde */
+}
+
+.game-2048.kick-theme .leaderboard-container h3 {
+  color: #00b501;
+}
+
+.game-2048.kick-theme .leaderboard-scroll::-webkit-scrollbar-thumb {
+  background: #00e701;
+}
+
+.game-2048.kick-theme .leaderboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: #00b501;
+}
+
+.game-2048.kick-theme .leaderboard-scroll {
+  scrollbar-color: #00e701 #f1f1f1;
+}
+
+.game-2048.kick-theme .leaderboard-item {
+  background: rgba(230, 255, 230, 0.8);
+}
+
+.game-2048.kick-theme .leaderboard-item:hover {
+  background: rgba(204, 255, 204, 0.8);
+}
+
+/* Kick theme - Top 3 keep gold, silver, bronze */
+.game-2048.kick-theme .leaderboard-rank.rank-1 {
+  background-color: #ffd700; /* Oro */
+  color: #000;
+}
+
+.game-2048.kick-theme .leaderboard-rank.rank-2 {
+  background-color: #c0c0c0; /* Plata */
+  color: #000;
+}
+
+.game-2048.kick-theme .leaderboard-rank.rank-3 {
+  background-color: #cd7f32; /* Bronce */
+  color: #fff;
+}
+
+/* Kick theme - Top 3 scores keep gold, silver, bronze */
+.game-2048.kick-theme .leaderboard-score.score-1 {
+  color: #ffd700; /* Oro */
+}
+
+.game-2048.kick-theme .leaderboard-score.score-2 {
+  color: #c0c0c0; /* Plata */
+}
+
+.game-2048.kick-theme .leaderboard-score.score-3 {
+  color: #cd7f32; /* Bronce */
+}
+
+.game-2048.kick-theme .leaderboard-rank {
+  background-color: #00e701;
+}
+
+/* Kick theme - Top 4+ use Kick green */
+.game-2048.kick-theme .leaderboard-rank.rank-4-plus {
+  background-color: #00e701; /* Kick green */
+  color: white;
+}
+
+.game-2048.kick-theme .leaderboard-score {
+  color: #00b501;
+}
+
+/* Kick theme - Top 4+ scores use Kick green */
+.game-2048.kick-theme .leaderboard-score.score-4-plus {
+  color: #00e701; /* Kick green */
+}
+

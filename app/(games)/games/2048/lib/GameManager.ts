@@ -24,11 +24,11 @@ export class GameManager {
   won: boolean = false;
   keepPlaying: boolean = false;
 
-  constructor(size: number, InputManager: typeof KeyboardInputManager, Actuator: typeof HTMLActuator, StorageManager: typeof LocalStorageManager) {
+  constructor(size: number, InputManager: typeof KeyboardInputManager, Actuator: HTMLActuator, StorageManager: typeof LocalStorageManager) {
     this.size = size;
     this.inputManager = new InputManager();
     this.storageManager = new StorageManager();
-    this.actuator = new Actuator();
+    this.actuator = Actuator;
 
     this.inputManager.on("move", this.move.bind(this));
     this.inputManager.on("restart", this.restart.bind(this));
@@ -275,4 +275,5 @@ export class GameManager {
   positionsEqual(first: { x: number; y: number }, second: Tile): boolean {
     return first.x === second.x && first.y === second.y;
   }
+
 }

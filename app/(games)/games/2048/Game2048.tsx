@@ -3,20 +3,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { GameManager } from './lib/GameManager';
 import { KeyboardInputManager } from './lib/KeyboardInputManager';
-import { HTMLActuator } from './lib/HTMLActuator';
+import { HTMLActuatorWithCallbacks } from './lib/HTMLActuatorWithCallbacks';
 import { LocalStorageManager } from './lib/LocalStorageManager';
+import { useScoreSubmission } from './hooks/useScoreSubmission';
+import ScoreNotification from './components/ScoreNotification';
 
 export default function Game2048() {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const gameManagerRef = useRef<GameManager | null>(null);
   const [isKickTheme, setIsKickTheme] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [isNewRecord, setIsNewRecord] = useState(false);
+  const { submitScore, isSubmitting } = useScoreSubmission();
+  const submitScoreRef = useRef(submitScore);
 
   useEffect(() => {
     // Wait till the browser is ready to render the game (avoids glitches)
     const initGame = () => {
       if (gameContainerRef.current && !gameManagerRef.current) {
-        gameManagerRef.current = new GameManager(4, KeyboardInputManager, HTMLActuator, LocalStorageManager);
+        const actuator = new HTMLActuatorWithCallbacks();
+        
+        gameManagerRef.current = new GameManager(4, KeyboardInputManager, actuator, LocalStorageManager);
       }
     };
 
@@ -25,8 +33,41 @@ export default function Game2048() {
       window.requestAnimationFrame(initGame);
     }
 
+    // Event listeners para game over y game won
+    const handleGameOver = (event: CustomEvent) => {
+      const score = event.detail.score;
+      submitScoreRef.current(score).then(result => {
+        if (result) {
+          setIsNewRecord(result.updated);
+          setShowNotification(true);
+        }
+      }).catch(error => {
+        // Error submitting score - silently fail
+      });
+    };
+
+    const handleGameWon = (event: CustomEvent) => {
+      const score = event.detail.score;
+      submitScoreRef.current(score).then(result => {
+        if (result) {
+          setIsNewRecord(result.updated);
+          setShowNotification(true);
+        }
+      }).catch(error => {
+        // Error submitting score - silently fail
+      });
+    };
+
+    // Agregar event listeners
+    window.addEventListener('gameOver', handleGameOver as EventListener);
+    window.addEventListener('gameWon', handleGameWon as EventListener);
+
     // Cleanup function
     return () => {
+      // Remover event listeners
+      window.removeEventListener('gameOver', handleGameOver as EventListener);
+      window.removeEventListener('gameWon', handleGameWon as EventListener);
+      
       // Clean up any event listeners if needed
       if (gameManagerRef.current) {
         // The GameManager doesn't expose cleanup methods, but we can nullify the reference
@@ -34,6 +75,11 @@ export default function Game2048() {
       }
     };
   }, []);
+
+  // Actualizar la referencia cuando submitScore cambie
+  useEffect(() => {
+    submitScoreRef.current = submitScore;
+  }, [submitScore]);
 
   const handleThemeSwitch = () => {
     setIsKickTheme(!isKickTheme);
@@ -44,6 +90,9 @@ export default function Game2048() {
       } else {
         body.classList.add('kick-theme');
       }
+      
+      // Emitir evento para notificar el cambio de tema
+      window.dispatchEvent(new CustomEvent('themeChanged'));
     }
   };
 
@@ -153,6 +202,12 @@ export default function Game2048() {
           <img src="/games/2048/media/guia.png" alt="Guia" />
         </div>
       )}
+
+      <ScoreNotification
+        show={showNotification}
+        isNewRecord={isNewRecord}
+        onClose={() => setShowNotification(false)}
+      />
 
       {/* Font Awesome CDN */}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
