@@ -8,50 +8,64 @@ export interface TopScore {
 }
 
 export async function getTopScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
-  const scores = await prisma.score.findMany({
-    where: {
-      gameSlug,
-    },
-    include: {
-      user: true,
-    },
-    orderBy: {
-      value: 'desc',
-    },
-    take: limit,
-  })
+  try {
+    console.log(`🔍 getTopScores: Fetching ${limit} scores for game ${gameSlug}`);
+    const scores = await prisma.score.findMany({
+      where: {
+        gameSlug,
+      },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        value: 'desc',
+      },
+      take: limit,
+    })
 
-  return scores.map((score: any) => ({
-    displayName: score.user.displayName || score.user.name || 'Anonymous',
-    avatarUrl: score.user.avatarUrl || score.user.image,
-    twitchLogin: score.user.twitchLogin || 'unknown',
-    value: score.value,
-  }))
+    console.log(`✅ getTopScores: Found ${scores.length} scores`);
+    return scores.map((score: any) => ({
+      displayName: score.user.displayName || score.user.name || 'Anonymous',
+      avatarUrl: score.user.avatarUrl || score.user.image,
+      twitchLogin: score.user.twitchLogin || 'unknown',
+      value: score.value,
+    }))
+  } catch (error) {
+    console.error('❌ getTopScores error:', error);
+    return [];
+  }
 }
 
 export async function getTopStreamerScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
-  const scores = await prisma.score.findMany({
-    where: {
-      gameSlug,
-      user: {
-        isStreamer: true, // Filter by isStreamer directly on User
+  try {
+    console.log(`🔍 getTopStreamerScores: Fetching ${limit} streamer scores for game ${gameSlug}`);
+    const scores = await prisma.score.findMany({
+      where: {
+        gameSlug,
+        user: {
+          isStreamer: true, // Filter by isStreamer directly on User
+        },
       },
-    },
-    include: {
-      user: true,
-    },
-    orderBy: {
-      value: 'desc',
-    },
-    take: limit,
-  })
+      include: {
+        user: true,
+      },
+      orderBy: {
+        value: 'desc',
+      },
+      take: limit,
+    })
 
-  return scores.map((score: any) => ({
-    displayName: score.user.displayName || score.user.name || 'Anonymous',
-    avatarUrl: score.user.avatarUrl || score.user.image,
-    twitchLogin: score.user.twitchLogin || 'unknown',
-    value: score.value,
-  }))
+    console.log(`✅ getTopStreamerScores: Found ${scores.length} streamer scores`);
+    return scores.map((score: any) => ({
+      displayName: score.user.displayName || score.user.name || 'Anonymous',
+      avatarUrl: score.user.avatarUrl || score.user.image,
+      twitchLogin: score.user.twitchLogin || 'unknown',
+      value: score.value,
+    }))
+  } catch (error) {
+    console.error('❌ getTopStreamerScores error:', error);
+    return [];
+  }
 }
 
 export async function upsertBestScore(

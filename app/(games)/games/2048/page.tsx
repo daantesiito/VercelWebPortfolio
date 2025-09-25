@@ -7,6 +7,10 @@ import AuthButton from '@/components/AuthButton';
 import './styles.css';
 import './leaderboard.css';
 
+// Forzar Node.js runtime para Prisma
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: '2048 — dantesito.dev',
   description: 'Jugá al juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
@@ -52,10 +56,26 @@ export default async function Game2048Page() {
     );
   }
 
-  const [topScores, streamerScores] = await Promise.all([
-    getTopScores('2048', 100), // Obtener hasta 100 scores globales
-    getTopStreamerScores('2048', 100) // Obtener hasta 100 scores de streamers
-  ]);
+  // Obtener scores con manejo de errores
+  let topScores = [];
+  let streamerScores = [];
+  
+  try {
+    console.log('🔍 Fetching scores for 2048 game...');
+    [topScores, streamerScores] = await Promise.all([
+      getTopScores('2048', 100), // Obtener hasta 100 scores globales
+      getTopStreamerScores('2048', 100) // Obtener hasta 100 scores de streamers
+    ]);
+    console.log('✅ Scores fetched successfully:', { 
+      topScoresCount: topScores.length, 
+      streamerScoresCount: streamerScores.length 
+    });
+  } catch (error) {
+    console.error('❌ Error fetching scores:', error);
+    // Continuar con arrays vacíos si hay error
+    topScores = [];
+    streamerScores = [];
+  }
 
   return <GameWithLeaderboard initialScores={topScores} initialStreamerScores={streamerScores} />;
 }
