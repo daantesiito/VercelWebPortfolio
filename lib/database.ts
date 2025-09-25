@@ -46,13 +46,13 @@ export async function getScores(gameSlug: string, limit: number = 10, streamersO
 // Función para crear/actualizar usuario
 export async function upsertUser(userData: {
   id: string
-  name?: string
-  email?: string
-  image?: string
-  twitchId?: string
-  twitchLogin?: string
-  displayName?: string
-  avatarUrl?: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  twitchId?: string | null
+  twitchLogin?: string | null
+  displayName?: string | null
+  avatarUrl?: string | null
 }) {
   const queryText = `
     INSERT INTO "User" (
