@@ -30,52 +30,38 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
       return null
     }
 
-    // Try to get follower count using the /channels/followers endpoint
-    // This endpoint requires the user to be the broadcaster or have moderator access
+    // Try to get follower count using a public API approach
+    // Since moderator:read:followers requires special permissions, we'll use a different approach
     let followers = 0
     try {
-      console.log(`🔍 Fetching follower count for ${user.display_name} (ID: ${twitchId})`)
-      const followersResponse = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${twitchId}`, {
+      console.log(`🔍 Attempting to get follower count for ${user.display_name} (ID: ${twitchId})`)
+      
+      // Try using the Helix API with just the client ID (no auth required for basic info)
+      const publicResponse = await fetch(`https://api.twitch.tv/helix/users?id=${twitchId}`, {
         headers: {
           'Client-ID': clientId,
-          'Authorization': `Bearer ${accessToken}`,
         },
       })
 
-      console.log(`📊 Followers API response status: ${followersResponse.status}`)
+      console.log(`📊 Public API response status: ${publicResponse.status}`)
       
-      if (followersResponse.ok) {
-        const followersData = await followersResponse.json()
-        followers = followersData.total || 0
-        console.log(`✅ Fetched follower count for ${user.display_name}: ${followers}`)
-      } else {
-        const errorText = await followersResponse.text()
-        console.log(`❌ Failed to fetch follower count: ${followersResponse.status} - ${errorText}`)
+      if (publicResponse.ok) {
+        const publicData = await publicResponse.json()
+        const publicUser = publicData.data[0]
         
-        // Fallback: try to get basic channel info
-        try {
-          const channelResponse = await fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${twitchId}`, {
-            headers: {
-              'Client-ID': clientId,
-              'Authorization': `Bearer ${accessToken}`,
-            },
-          })
-          
-          if (channelResponse.ok) {
-            const channelData = await channelResponse.json()
-            const channel = channelData.data[0]
-            if (channel) {
-              // Unfortunately, the channel endpoint doesn't include follower count
-              // But we can at least get the display name
-              console.log(`Got channel info for ${channel.broadcaster_name}`)
-            }
-          }
-        } catch (channelError) {
-          console.log('Error fetching channel info:', channelError)
+        if (publicUser) {
+          // Unfortunately, the public API doesn't include follower count
+          // We'll set a placeholder value and mark for manual review
+          followers = -1 // -1 indicates "unknown" - needs manual review
+          console.log(`⚠️ Follower count not available via public API for ${user.display_name}`)
         }
+      } else {
+        console.log(`❌ Public API failed: ${publicResponse.status}`)
+        followers = -1
       }
     } catch (error) {
       console.log('Error fetching follower count:', error)
+      followers = -1
     }
 
     return {

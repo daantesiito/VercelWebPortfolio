@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
     TwitchProvider({
       clientId: process.env.TWITCH_CLIENT_ID!,
       clientSecret: process.env.TWITCH_CLIENT_SECRET!,
-      authorization: { params: { scope: "openid user:read:email moderator:read:followers" } },
+      authorization: { params: { scope: "openid user:read:email" } },
       profile: (profile: any) => ({
         id: profile.sub, // OIDC subject
         name: profile.preferred_username ?? profile.name ?? null,
