@@ -1,8 +1,8 @@
 import { NextAuthOptions } from 'next-auth'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import TwitchProvider from 'next-auth/providers/twitch'
 import { prisma, disconnectPrisma } from './prisma'
 import { withAuthDatabase } from './db-connection'
-import { vercelPrismaAdapter } from './auth-adapter'
 import { updateUserStreamerStatus } from './twitch'
 
 // Log de configuración de variables de entorno
@@ -16,7 +16,7 @@ console.log('🔧 NextAuth Configuration:', {
 })
 
 export const authOptions: NextAuthOptions = {
-  adapter: vercelPrismaAdapter,
+  adapter: PrismaAdapter(prisma),
   providers: [
     TwitchProvider({
       clientId: process.env.TWITCH_CLIENT_ID!,

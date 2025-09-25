@@ -18,10 +18,10 @@ En entornos serverless como Vercel:
 - Función para crear nuevas instancias `createNewPrismaClient()`
 - Manejo de errores de desconexión
 
-### 2. Adaptador Personalizado (`lib/auth-adapter.ts`)
-- Extiende PrismaAdapter con manejo de errores de conexión
-- Reintentos automáticos con nueva instancia de Prisma
-- Override de métodos críticos: `getUserByEmail`, `getUserByAccount`, `createUser`, `updateUser`
+### 2. Configuración de NextAuth (`lib/auth.ts`)
+- Uso del adaptador estándar PrismaAdapter con manejo de errores en callbacks
+- Wrapper `withAuthDatabase()` para operaciones críticas
+- Eventos de desconexión después de signIn/signOut
 
 ### 3. Wrapper de Base de Datos (`lib/db-connection.ts`)
 - Función `withDatabase()` con reintentos automáticos
@@ -34,12 +34,7 @@ En entornos serverless como Vercel:
 - Configuración específica de base de datos para Vercel
 - Detección automática del entorno Vercel
 
-### 5. Configuración de NextAuth (`lib/auth.ts`)
-- Uso del adaptador personalizado `vercelPrismaAdapter`
-- Uso del wrapper `withAuthDatabase()` en operaciones críticas
-- Eventos de desconexión después de signIn/signOut
-
-### 6. Configuración de Vercel (`vercel.json`)
+### 5. Configuración de Vercel (`vercel.json`)
 - Timeout de 30 segundos para funciones API
 - Configuración de entorno de producción
 
