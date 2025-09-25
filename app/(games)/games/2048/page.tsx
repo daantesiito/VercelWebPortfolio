@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getTopScores, getTopStreamerScores } from '@/lib/scores';
+import { getTopScores, getTopStreamerScores, type TopScore } from '@/lib/scores';
 import GameWithLeaderboard from './components/GameWithLeaderboard';
 import AuthButton from '@/components/AuthButton';
 import './styles.css';
@@ -57,8 +57,8 @@ export default async function Game2048Page() {
   }
 
   // Obtener scores con manejo de errores
-  let topScores = [];
-  let streamerScores = [];
+  let topScores: TopScore[] = [];
+  let streamerScores: TopScore[] = [];
   
   try {
     console.log('🔍 Fetching scores for 2048 game...');
