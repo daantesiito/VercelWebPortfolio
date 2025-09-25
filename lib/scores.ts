@@ -1,4 +1,4 @@
-import { prisma } from './prisma-serverless'
+import { getScores } from './database'
 
 export interface TopScore {
   displayName: string
@@ -10,24 +10,13 @@ export interface TopScore {
 export async function getTopScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
     console.log(`🔍 getTopScores: Fetching ${limit} scores for game ${gameSlug}`);
-    const scores = await prisma.score.findMany({
-      where: {
-        gameSlug,
-      },
-      include: {
-        user: true,
-      },
-      orderBy: {
-        value: 'desc',
-      },
-      take: limit,
-    })
+    const scores = await getScores(gameSlug, limit, false)
 
     console.log(`✅ getTopScores: Found ${scores.length} scores`);
     return scores.map((score: any) => ({
-      displayName: score.user.displayName || score.user.name || 'Anonymous',
-      avatarUrl: score.user.avatarUrl || score.user.image,
-      twitchLogin: score.user.twitchLogin || 'unknown',
+      displayName: score.displayName || 'Anonymous',
+      avatarUrl: score.avatarUrl,
+      twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
     }))
   } catch (error) {
@@ -39,27 +28,13 @@ export async function getTopScores(gameSlug: string, limit: number = 10): Promis
 export async function getTopStreamerScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
     console.log(`🔍 getTopStreamerScores: Fetching ${limit} streamer scores for game ${gameSlug}`);
-    const scores = await prisma.score.findMany({
-      where: {
-        gameSlug,
-        user: {
-          isStreamer: true, // Filter by isStreamer directly on User
-        },
-      },
-      include: {
-        user: true,
-      },
-      orderBy: {
-        value: 'desc',
-      },
-      take: limit,
-    })
+    const scores = await getScores(gameSlug, limit, true)
 
     console.log(`✅ getTopStreamerScores: Found ${scores.length} streamer scores`);
     return scores.map((score: any) => ({
-      displayName: score.user.displayName || score.user.name || 'Anonymous',
-      avatarUrl: score.user.avatarUrl || score.user.image,
-      twitchLogin: score.user.twitchLogin || 'unknown',
+      displayName: score.displayName || 'Anonymous',
+      avatarUrl: score.avatarUrl,
+      twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
     }))
   } catch (error) {
@@ -73,44 +48,15 @@ export async function upsertBestScore(
   gameSlug: string,
   value: number
 ): Promise<{ best: number; updated: boolean }> {
-  const existingScore = await prisma.score.findUnique({
-    where: {
-      userId_gameSlug: {
-        userId,
-        gameSlug,
-      },
-    },
-  })
-
-  if (!existingScore) {
-    // Crear nuevo score
-    await prisma.score.create({
-      data: {
-        userId,
-        gameSlug,
-        value,
-      },
-    })
-    return { best: value, updated: true }
+  const { upsertScore } = await import('./database')
+  
+  try {
+    const result = await upsertScore(userId, gameSlug, value)
+    return { best: result.value, updated: true }
+  } catch (error) {
+    console.error('❌ Error upserting score:', error)
+    return { best: 0, updated: false }
   }
-
-  if (value > existingScore.value) {
-    // Actualizar con mejor score
-    await prisma.score.update({
-      where: {
-        userId_gameSlug: {
-          userId,
-          gameSlug,
-        },
-      },
-      data: {
-        value,
-      },
-    })
-    return { best: value, updated: true }
-  }
-
-  return { best: existingScore.value, updated: false }
 }
 
 export function validateGameSlug(gameSlug: string): boolean {

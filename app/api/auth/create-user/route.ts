@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma-serverless';
+import { upsertUser } from '@/lib/database';
 import { updateUserStreamerStatus } from '@/lib/twitch';
 
 export async function POST(request: NextRequest) {
@@ -22,31 +22,16 @@ export async function POST(request: NextRequest) {
       avatarUrl
     });
 
-    // Crear o actualizar usuario
-    const user = await prisma.user.upsert({
-      where: { id: session.user.id },
-      update: {
-        name: displayName || session.user.name,
-        email: session.user.email,
-        image: avatarUrl || session.user.image,
-        twitchId: twitchId,
-        twitchLogin: twitchLogin,
-        displayName: displayName,
-        avatarUrl: avatarUrl,
-        updatedAt: new Date(),
-      },
-      create: {
-        id: session.user.id,
-        name: displayName || session.user.name,
-        email: session.user.email,
-        image: avatarUrl || session.user.image,
-        twitchId: twitchId,
-        twitchLogin: twitchLogin,
-        displayName: displayName,
-        avatarUrl: avatarUrl,
-        followers: 0,
-        isStreamer: false,
-      },
+    // Crear o actualizar usuario usando SQL directo
+    const user = await upsertUser({
+      id: session.user.id,
+      name: displayName || session.user.name,
+      email: session.user.email,
+      image: avatarUrl || session.user.image,
+      twitchId: twitchId,
+      twitchLogin: twitchLogin,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
     });
 
     console.log('✅ User created/updated successfully:', user.id);
@@ -63,14 +48,14 @@ export async function POST(request: NextRequest) {
       success: true, 
       user: {
         id: user.id,
-        name: user.name,
-        email: user.email,
-        twitchId: user.twitchId,
-        twitchLogin: user.twitchLogin,
-        displayName: user.displayName,
-        avatarUrl: user.avatarUrl,
-        followers: user.followers,
-        isStreamer: user.isStreamer,
+        name: displayName || session.user.name,
+        email: session.user.email,
+        twitchId: twitchId,
+        twitchLogin: twitchLogin,
+        displayName: displayName,
+        avatarUrl: avatarUrl,
+        followers: 0,
+        isStreamer: false,
       }
     });
 
