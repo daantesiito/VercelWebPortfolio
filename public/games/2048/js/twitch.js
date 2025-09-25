@@ -1,85 +1,64 @@
+// Twitch.js - Solo manejo de UI, sin OAuth personalizado
+// NextAuth.js maneja toda la autenticación
+
 const username = localStorage.getItem("username");
 const userInfo = document.getElementById("userInfo");
 const userAvatar = document.getElementById("userAvatar");
 const userName = document.getElementById("userName");
 const userAvatarUrl = localStorage.getItem("userAvatar");
-const container = document.querySelector(".container"); // Asegúrate de que el contenedor esté oculto por defecto
+const container = document.querySelector(".container");
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBRosYDuCKZYyalwORP1nhKFWD67rhAtAM",
-    authDomain: "twitch-bf66f.firebaseapp.com",
-    databaseURL: "https://twitch-bf66f-default-rtdb.firebaseio.com",
-    projectId: "twitch-bf66f",
-    storageBucket: "twitch-bf66f.firebasestorage.app",
-    messagingSenderId: "1077601562307",
-    appId: "1:1077601562307:web:0b1299de9de0b1360bbc76",
-    measurementId: "G-PTK4PBJ1KG"
-};
-
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
+// Mostrar/ocultar elementos según el estado de autenticación
 if (!username) {
-    loginWithTwitchButton.style.display = "block";
-    container.classList.add("hidden"); // Oculta el contenedor del juego
+    if (loginWithTwitchButton) {
+        loginWithTwitchButton.style.display = "block";
+    }
+    if (container) {
+        container.classList.add("hidden");
+    }
 } else {
-    loginWithTwitchButton.style.display = "none";
-    userInfo.classList.remove("hidden");
-    userAvatar.src = userAvatarUrl;
-    userName.textContent = `Username: ${username}`;
-    container.classList.remove("hidden");
+    if (loginWithTwitchButton) {
+        loginWithTwitchButton.style.display = "none";
+    }
+    if (userInfo) {
+        userInfo.classList.remove("hidden");
+    }
+    if (userAvatar && userAvatarUrl) {
+        userAvatar.src = userAvatarUrl;
+    }
+    if (userName) {
+        userName.textContent = `Username: ${username}`;
+    }
+    if (container) {
+        container.classList.remove("hidden");
+    }
 }
 
-// Login con Twitch manejado por NextAuth.js
-// No necesitamos código personalizado aquí
-
-function handleTwitchAuth() {
-    const hash = window.location.hash;
-    if (hash) {
-        const params = new URLSearchParams(hash.substring(1)); // Elimina el #
-        const accessToken = params.get('access_token');
+// Función para actualizar la UI cuando el usuario se autentica
+function updateUserUI(userData) {
+    if (userData) {
+        localStorage.setItem("username", userData.display_name || userData.name);
+        localStorage.setItem("userAvatar", userData.profile_image_url || userData.image);
         
-        if (accessToken) {
-            fetch('https://api.twitch.tv/helix/users', {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Client-Id': 'a4f56mmonqz9erz1kml6m0bpyaauza'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const user = data.data[0];
-
-                // Guardar información del usuario en localStorage
-                localStorage.setItem("username", user.display_name);
-                localStorage.setItem("userAvatar", user.profile_image_url);
-
-                // Actualizar la UI
-                loginWithTwitchButton.style.display = "none";
-                userInfo.classList.remove("hidden");
-                userAvatar.src = user.profile_image_url;
-                userName.textContent = `Username: ${user.display_name}`;
-                container.classList.remove("hidden");
-
-                // Crear un archivo vacío con el userName en la carpeta TwitchdleUsernames
-                const userRef = database.ref('2048Usernames/' + user.display_name);
-                userRef.set(true);                 
-
-                // Limpiar la URL para eliminar los parámetros después del #
-                history.replaceState(null, '', window.location.pathname);
-            })
-            .catch(error => console.error('Error fetching Twitch user:', error));
+        if (loginWithTwitchButton) {
+            loginWithTwitchButton.style.display = "none";
+        }
+        if (userInfo) {
+            userInfo.classList.remove("hidden");
+        }
+        if (userAvatar && userData.profile_image_url) {
+            userAvatar.src = userData.profile_image_url;
+        }
+        if (userName && userData.display_name) {
+            userName.textContent = `Username: ${userData.display_name}`;
+        }
+        if (container) {
+            container.classList.remove("hidden");
         }
     }
 }
 
-handleTwitchAuth();
-
-if (username && userAvatarUrl) {
-    loginWithTwitchButton.style.display = "none";
-    userInfo.classList.remove("hidden");
-    userAvatar.src = userAvatarUrl;
-    userName.textContent = `Username: ${username}`;
-    container.classList.remove("hidden");
+// Exportar función para uso externo si es necesario
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { updateUserUI };
 }
