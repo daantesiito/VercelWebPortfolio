@@ -14,8 +14,8 @@ export async function getTopScores(gameSlug: string, limit: number = 10): Promis
 
     console.log(`✅ getTopScores: Found ${scores.length} scores`);
     return scores.map((score: any) => ({
-      displayName: score.displayName || 'Anonymous',
-      avatarUrl: score.avatarUrl,
+      displayName: score.displayname || score.displayName || 'Anonymous',
+      avatarUrl: score.avatarurl || score.avatarUrl,
       twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
     }))
@@ -32,8 +32,8 @@ export async function getTopStreamerScores(gameSlug: string, limit: number = 10)
 
     console.log(`✅ getTopStreamerScores: Found ${scores.length} streamer scores`);
     return scores.map((score: any) => ({
-      displayName: score.displayName || 'Anonymous',
-      avatarUrl: score.avatarUrl,
+      displayName: score.displayname || score.displayName || 'Anonymous',
+      avatarUrl: score.avatarurl || score.avatarUrl,
       twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
     }))
