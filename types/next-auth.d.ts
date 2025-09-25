@@ -8,6 +8,7 @@ declare module 'next-auth' {
       email?: string | null
       image?: string | null
       twitchId?: string
+      twitchLogin?: string
     }
   }
 
@@ -30,5 +31,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     sub: string
     twitchId?: string
+    twitchLogin?: string
   }
 }

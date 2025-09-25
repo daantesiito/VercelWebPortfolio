@@ -45,7 +45,9 @@ export const authOptions: NextAuthOptions = {
       })
       if (account && profile) {
         token.twitchId = profile.sub
+        token.twitchLogin = profile.preferred_username
         console.log('✅ JWT: Added twitchId to token:', profile.sub)
+        console.log('✅ JWT: Added twitchLogin to token:', profile.preferred_username)
       }
       return token
     },
@@ -54,7 +56,8 @@ export const authOptions: NextAuthOptions = {
         hasSession: !!session, 
         hasToken: !!token,
         tokenSub: token?.sub,
-        tokenTwitchId: token?.twitchId
+        tokenTwitchId: token?.twitchId,
+        tokenTwitchLogin: token?.twitchLogin
       })
       if (token.sub) {
         session.user.id = token.sub
@@ -63,6 +66,10 @@ export const authOptions: NextAuthOptions = {
       if (token.twitchId) {
         session.user.twitchId = token.twitchId as string
         console.log('✅ Session: Added twitchId:', token.twitchId)
+      }
+      if (token.twitchLogin) {
+        session.user.twitchLogin = token.twitchLogin as string
+        console.log('✅ Session: Added twitchLogin:', token.twitchLogin)
       }
       return session
     },
