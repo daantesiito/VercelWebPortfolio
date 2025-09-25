@@ -1,10 +1,11 @@
-import { prisma } from './vercel-prisma'
+import { prisma } from './prisma'
 
 // Function to get Twitch user info including follower count
 export async function getTwitchUserInfo(accessToken: string, twitchId: string): Promise<{ followers: number; displayName: string } | null> {
   try {
     const clientId = process.env.TWITCH_CLIENT_ID
     if (!clientId) {
+      console.log('TWITCH_CLIENT_ID not set')
       return null
     }
 
@@ -17,6 +18,7 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
     })
 
     if (!userResponse.ok) {
+      console.log('Failed to fetch Twitch user info:', userResponse.status)
       return null
     }
 
@@ -24,6 +26,7 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
     const user = userData.data[0]
 
     if (!user) {
+      console.log('No user data found')
       return null
     }
 
@@ -41,9 +44,34 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
       if (followersResponse.ok) {
         const followersData = await followersResponse.json()
         followers = followersData.total || 0
+        console.log(`Fetched follower count for ${user.display_name}: ${followers}`)
+      } else {
+        console.log('Failed to fetch follower count:', followersResponse.status, await followersResponse.text())
+        
+        // Fallback: try to get basic channel info
+        try {
+          const channelResponse = await fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${twitchId}`, {
+            headers: {
+              'Client-ID': clientId,
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          })
+          
+          if (channelResponse.ok) {
+            const channelData = await channelResponse.json()
+            const channel = channelData.data[0]
+            if (channel) {
+              // Unfortunately, the channel endpoint doesn't include follower count
+              // But we can at least get the display name
+              console.log(`Got channel info for ${channel.broadcaster_name}`)
+            }
+          }
+        } catch (channelError) {
+          console.log('Error fetching channel info:', channelError)
+        }
       }
     } catch (error) {
-      // Silent fail for follower count
+      console.log('Error fetching follower count:', error)
     }
 
     return {
@@ -51,6 +79,7 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
       displayName: user.display_name || user.login
     }
   } catch (error) {
+    console.log('Error fetching Twitch user info:', error)
     return null
   }
 }
@@ -72,7 +101,7 @@ export async function updateUserStreamerStatus(userId: string, accessToken: stri
         },
       })
       
-      // User updated successfully
+      console.log(`User ${userId} updated: followers=${userInfo.followers}, isStreamer=${isStreamer}`)
     } else {
       // Fallback: set default values and mark as potential streamer for manual review
       // Since we can't get follower count reliably, we'll set a placeholder
@@ -85,9 +114,10 @@ export async function updateUserStreamerStatus(userId: string, accessToken: stri
         },
       })
       
-      // User updated with placeholder values
+      console.log(`User ${userId} updated with placeholder values (follower count unavailable)`)
     }
   } catch (error) {
+    console.log('Error updating streamer status:', error)
     // Don't throw - this is not critical for login
   }
 }

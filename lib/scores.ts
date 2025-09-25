@@ -1,4 +1,4 @@
-import { prisma } from './vercel-prisma'
+import { prisma } from './prisma'
 
 export interface TopScore {
   displayName: string
@@ -9,6 +9,7 @@ export interface TopScore {
 
 export async function getTopScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
+    console.log(`🔍 getTopScores: Fetching ${limit} scores for game ${gameSlug}`);
     const scores = await prisma.score.findMany({
       where: {
         gameSlug,
@@ -22,6 +23,7 @@ export async function getTopScores(gameSlug: string, limit: number = 10): Promis
       take: limit,
     })
 
+    console.log(`✅ getTopScores: Found ${scores.length} scores`);
     return scores.map((score: any) => ({
       displayName: score.user.displayName || score.user.name || 'Anonymous',
       avatarUrl: score.user.avatarUrl || score.user.image,
@@ -29,12 +31,14 @@ export async function getTopScores(gameSlug: string, limit: number = 10): Promis
       value: score.value,
     }))
   } catch (error) {
+    console.error('❌ getTopScores error:', error);
     return [];
   }
 }
 
 export async function getTopStreamerScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
+    console.log(`🔍 getTopStreamerScores: Fetching ${limit} streamer scores for game ${gameSlug}`);
     const scores = await prisma.score.findMany({
       where: {
         gameSlug,
@@ -51,6 +55,7 @@ export async function getTopStreamerScores(gameSlug: string, limit: number = 10)
       take: limit,
     })
 
+    console.log(`✅ getTopStreamerScores: Found ${scores.length} streamer scores`);
     return scores.map((score: any) => ({
       displayName: score.user.displayName || score.user.name || 'Anonymous',
       avatarUrl: score.user.avatarUrl || score.user.image,
@@ -58,6 +63,7 @@ export async function getTopStreamerScores(gameSlug: string, limit: number = 10)
       value: score.value,
     }))
   } catch (error) {
+    console.error('❌ getTopStreamerScores error:', error);
     return [];
   }
 }
