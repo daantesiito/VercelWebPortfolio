@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 // Configuración específica para Vercel serverless
 // Evita prepared statements y usa connection pooling
 const createServerlessPrismaClient = () => {
-  const client = new PrismaClient({
+  return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
     datasources: {
       db: {
@@ -11,17 +11,6 @@ const createServerlessPrismaClient = () => {
       },
     },
   })
-
-  // Configuración específica para serverless
-  if (process.env.NODE_ENV === 'production') {
-    // En producción, no usar prepared statements
-    client.$connect = async () => {
-      // Conectar sin prepared statements
-      return client
-    }
-  }
-
-  return client
 }
 
 // Singleton para evitar múltiples instancias
