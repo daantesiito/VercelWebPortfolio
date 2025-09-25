@@ -20,7 +20,8 @@ export const authOptions: NextAuthOptions = {
     TwitchProvider({
       clientId: process.env.TWITCH_CLIENT_ID!,
       clientSecret: process.env.TWITCH_CLIENT_SECRET!,
-      authorization: { params: { scope: "user:read:email" } },
+      authorization: { params: { scope: "openid user:read:email" } },
+      idToken: false, // Deshabilitar idToken si Twitch no lo proporciona
     }),
   ],
   debug: true, // Habilitar debug de NextAuth
