@@ -34,6 +34,7 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
     // This endpoint requires the user to be the broadcaster or have moderator access
     let followers = 0
     try {
+      console.log(`🔍 Fetching follower count for ${user.display_name} (ID: ${twitchId})`)
       const followersResponse = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${twitchId}`, {
         headers: {
           'Client-ID': clientId,
@@ -41,12 +42,15 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
         },
       })
 
+      console.log(`📊 Followers API response status: ${followersResponse.status}`)
+      
       if (followersResponse.ok) {
         const followersData = await followersResponse.json()
         followers = followersData.total || 0
-        console.log(`Fetched follower count for ${user.display_name}: ${followers}`)
+        console.log(`✅ Fetched follower count for ${user.display_name}: ${followers}`)
       } else {
-        console.log('Failed to fetch follower count:', followersResponse.status, await followersResponse.text())
+        const errorText = await followersResponse.text()
+        console.log(`❌ Failed to fetch follower count: ${followersResponse.status} - ${errorText}`)
         
         // Fallback: try to get basic channel info
         try {
