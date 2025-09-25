@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import TwitchProvider from 'next-auth/providers/twitch'
-import { prisma } from './prisma'
+import { prisma } from './vercel-prisma'
 import { updateUserStreamerStatus } from './twitch'
 
 // NextAuth Configuration

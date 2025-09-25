@@ -9,6 +9,7 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")    // pool (pgBouncer) para runtime
   directUrl = env("DIRECT_URL")      // directa para migraciones
+  relationMode = "prisma"
 }
 
 // NextAuth.js models

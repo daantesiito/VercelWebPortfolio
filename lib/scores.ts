@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from './vercel-prisma'
 
 export interface TopScore {
   displayName: string

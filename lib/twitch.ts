@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from './vercel-prisma'
 
 // Function to get Twitch user info including follower count
 export async function getTwitchUserInfo(accessToken: string, twitchId: string): Promise<{ followers: number; displayName: string } | null> {
