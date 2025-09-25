@@ -1,28 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 
 export function useUserCreation() {
   const { data: session, status } = useSession();
+  const hasCreatedUser = useRef(false);
 
   useEffect(() => {
-    console.log('🔍 useUserCreation hook called:', { status, hasSession: !!session, hasUser: !!session?.user });
-    
-    if (status === 'authenticated' && session?.user) {
-      // Verificar si el usuario tiene datos de Twitch
+    // Solo ejecutar una vez cuando el usuario esté autenticado
+    if (status === 'authenticated' && session?.user && !hasCreatedUser.current) {
       const user = session.user as any;
       
-      console.log('🔍 User data:', {
-        id: user.id,
-        twitchId: user.twitchId,
-        twitchLogin: user.twitchLogin,
-        name: user.name,
-        email: user.email
-      });
-      
       if (user.twitchId && user.twitchLogin) {
-        console.log('🔧 Creating/updating user in database:', {
+        hasCreatedUser.current = true; // Marcar como ejecutado
+        
+        console.log('🔧 Creating/updating user in database (one-time):', {
           userId: user.id,
           twitchId: user.twitchId,
           twitchLogin: user.twitchLogin,
@@ -46,24 +39,19 @@ export function useUserCreation() {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            console.log('✅ User created/updated successfully:', data.user);
+            console.log('✅ User created/updated successfully (one-time):', data.user);
           } else {
             console.error('❌ Error creating user:', data.error);
+            hasCreatedUser.current = false; // Reset si hay error
           }
         })
         .catch(error => {
           console.error('❌ Error creating user:', error);
-        });
-      } else {
-        console.log('❌ User creation skipped - missing Twitch data:', {
-          hasTwitchId: !!user.twitchId,
-          hasTwitchLogin: !!user.twitchLogin
+          hasCreatedUser.current = false; // Reset si hay error
         });
       }
-    } else {
-      console.log('❌ User creation skipped - not authenticated:', { status, hasSession: !!session });
     }
-  }, [session, status]);
+  }, [status]); // Solo depender de status, no de session
 
   return { session, status };
 }

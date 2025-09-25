@@ -86,6 +86,21 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
 
 export async function updateUserStreamerStatus(userId: string, accessToken: string, twitchId: string): Promise<void> {
   try {
+    // Verificar si el usuario ya tiene followers actualizados recientemente
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { followers: true, updatedAt: true }
+    })
+    
+    // Si el usuario ya tiene followers y fue actualizado en las últimas 24 horas, no actualizar
+    if (existingUser && existingUser.followers > 0 && existingUser.updatedAt) {
+      const hoursSinceUpdate = (Date.now() - existingUser.updatedAt.getTime()) / (1000 * 60 * 60)
+      if (hoursSinceUpdate < 24) {
+        console.log(`User ${userId} already has recent follower data (${existingUser.followers} followers), skipping update`)
+        return
+      }
+    }
+    
     const userInfo = await getTwitchUserInfo(accessToken, twitchId)
     
     if (userInfo && userInfo.followers > 0) {
@@ -96,25 +111,14 @@ export async function updateUserStreamerStatus(userId: string, accessToken: stri
         data: {
           followers: userInfo.followers,
           isStreamer,
-          displayName: userInfo.displayName, // Update display name too
+          displayName: userInfo.displayName,
           updatedAt: new Date(),
         },
       })
       
       console.log(`User ${userId} updated: followers=${userInfo.followers}, isStreamer=${isStreamer}`)
     } else {
-      // Fallback: set default values and mark as potential streamer for manual review
-      // Since we can't get follower count reliably, we'll set a placeholder
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          followers: -1, // -1 indicates "unknown" - needs manual review
-          isStreamer: false, // Default to false until manually verified
-          updatedAt: new Date(),
-        },
-      })
-      
-      console.log(`User ${userId} updated with placeholder values (follower count unavailable)`)
+      console.log(`User ${userId} - could not fetch follower data, keeping existing values`)
     }
   } catch (error) {
     console.log('Error updating streamer status:', error)
