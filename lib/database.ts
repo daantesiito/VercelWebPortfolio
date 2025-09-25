@@ -25,8 +25,8 @@ export async function getScores(gameSlug: string, limit: number = 10, streamersO
   let queryText = `
     SELECT 
       s.value,
-      u.name as displayName,
-      u.image as avatarUrl,
+      COALESCE(u."displayName", u.name) as displayName,
+      u."avatarUrl" as avatarUrl,
       u."twitchLogin"
     FROM "Score" s
     JOIN "User" u ON s."userId" = u.id
@@ -40,6 +40,7 @@ export async function getScores(gameSlug: string, limit: number = 10, streamersO
   queryText += ` ORDER BY s.value DESC LIMIT $2`
   
   const result = await query(queryText, [gameSlug, limit])
+  console.log('🔍 getScores result:', result.rows)
   return result.rows
 }
 
@@ -54,6 +55,14 @@ export async function upsertUser(userData: {
   displayName?: string | null
   avatarUrl?: string | null
 }) {
+  console.log('🔧 upsertUser called with data:', {
+    id: userData.id,
+    name: userData.name,
+    displayName: userData.displayName,
+    twitchLogin: userData.twitchLogin,
+    avatarUrl: userData.avatarUrl
+  })
+
   const queryText = `
     INSERT INTO "User" (
       id, name, email, image, "twitchId", "twitchLogin", 
@@ -70,7 +79,7 @@ export async function upsertUser(userData: {
       "displayName" = EXCLUDED."displayName",
       "avatarUrl" = EXCLUDED."avatarUrl",
       "updatedAt" = NOW()
-    RETURNING id
+    RETURNING id, name, "displayName", "twitchLogin", "avatarUrl"
   `
   
   const result = await query(queryText, [
@@ -86,6 +95,7 @@ export async function upsertUser(userData: {
     false, // isStreamer
   ])
   
+  console.log('✅ upsertUser result:', result.rows[0])
   return result.rows[0]
 }
 
