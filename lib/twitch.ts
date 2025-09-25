@@ -1,4 +1,4 @@
-import { prisma } from './prisma-serverless'
+import { prisma } from './prisma'
 
 // Function to get Twitch user info including follower count
 export async function getTwitchUserInfo(accessToken: string, twitchId: string): Promise<{ followers: number; displayName: string } | null> {
