@@ -93,7 +93,7 @@ export async function updateUserStreamerStatus(userId: string, accessToken: stri
     })
     
     // Si el usuario ya tiene followers y fue actualizado en las últimas 24 horas, no actualizar
-    if (existingUser && existingUser.followers > 0 && existingUser.updatedAt) {
+    if (existingUser && existingUser.followers && existingUser.followers > 0 && existingUser.updatedAt) {
       const hoursSinceUpdate = (Date.now() - existingUser.updatedAt.getTime()) / (1000 * 60 * 60)
       if (hoursSinceUpdate < 24) {
         console.log(`User ${userId} already has recent follower data (${existingUser.followers} followers), skipping update`)

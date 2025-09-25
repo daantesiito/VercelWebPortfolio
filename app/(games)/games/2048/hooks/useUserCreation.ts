@@ -51,7 +51,7 @@ export function useUserCreation() {
         });
       }
     }
-  }, [status]); // Solo depender de status, no de session
+  }, [status, session?.user?.id]); // Incluir session.user.id para evitar warning
 
   return { session, status };
 }
