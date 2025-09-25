@@ -4,6 +4,16 @@ import TwitchProvider from 'next-auth/providers/twitch'
 import { prisma } from './prisma'
 import { updateUserStreamerStatus } from './twitch'
 
+// Log de configuración de variables de entorno
+console.log('🔧 NextAuth Configuration:', {
+  hasClientId: !!process.env.TWITCH_CLIENT_ID,
+  hasClientSecret: !!process.env.TWITCH_CLIENT_SECRET,
+  hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
+  hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+  clientId: process.env.TWITCH_CLIENT_ID,
+  nextAuthUrl: process.env.NEXTAUTH_URL
+})
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -13,31 +23,49 @@ export const authOptions: NextAuthOptions = {
       authorization: { params: { scope: "user:read:email" } },
     }),
   ],
+  debug: true, // Habilitar debug de NextAuth
   session: {
     strategy: 'jwt',
   },
   callbacks: {
     async jwt({ token, account, profile }) {
+      console.log('🎫 JWT callback called:', { 
+        hasToken: !!token, 
+        hasAccount: !!account, 
+        hasProfile: !!profile,
+        tokenSub: token?.sub,
+        profileSub: profile?.sub
+      })
       if (account && profile) {
         token.twitchId = profile.sub
+        console.log('✅ JWT: Added twitchId to token:', profile.sub)
       }
       return token
     },
     async session({ session, token }) {
+      console.log('👤 Session callback called:', { 
+        hasSession: !!session, 
+        hasToken: !!token,
+        tokenSub: token?.sub,
+        tokenTwitchId: token?.twitchId
+      })
       if (token.sub) {
         session.user.id = token.sub
+        console.log('✅ Session: Added user.id:', token.sub)
       }
       if (token.twitchId) {
         session.user.twitchId = token.twitchId as string
+        console.log('✅ Session: Added twitchId:', token.twitchId)
       }
       return session
     },
     async signIn({ user, account, profile }) {
-      console.log('signIn callback called:', { 
+      console.log('🔐 signIn callback called:', { 
         userId: user.id, 
         provider: account?.provider, 
         hasProfile: !!profile,
-        profileData: profile
+        profileData: profile,
+        accountData: account
       })
       
       if (account?.provider === 'twitch' && profile) {
