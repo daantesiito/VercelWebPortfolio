@@ -1,4 +1,4 @@
-import { prisma } from './prisma'
+import { prisma } from './prisma-serverless'
 
 export interface TopScore {
   displayName: string
