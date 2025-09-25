@@ -7,9 +7,19 @@ export function useUserCreation() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
+    console.log('🔍 useUserCreation hook called:', { status, hasSession: !!session, hasUser: !!session?.user });
+    
     if (status === 'authenticated' && session?.user) {
       // Verificar si el usuario tiene datos de Twitch
       const user = session.user as any;
+      
+      console.log('🔍 User data:', {
+        id: user.id,
+        twitchId: user.twitchId,
+        twitchLogin: user.twitchLogin,
+        name: user.name,
+        email: user.email
+      });
       
       if (user.twitchId && user.twitchLogin) {
         console.log('🔧 Creating/updating user in database:', {
@@ -44,7 +54,14 @@ export function useUserCreation() {
         .catch(error => {
           console.error('❌ Error creating user:', error);
         });
+      } else {
+        console.log('❌ User creation skipped - missing Twitch data:', {
+          hasTwitchId: !!user.twitchId,
+          hasTwitchLogin: !!user.twitchLogin
+        });
       }
+    } else {
+      console.log('❌ User creation skipped - not authenticated:', { status, hasSession: !!session });
     }
   }, [session, status]);
 
