@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import Game2048 from '../Game2048'
 import TopScores from '@/components/TopScores'
 import UserProfile from './UserProfile'
+import { useUserCreation } from '../hooks/useUserCreation'
 import type { TopScore } from '@/components/TopScores'
 
 interface GameWithLeaderboardProps {
@@ -17,6 +18,9 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
   const [scores, setScores] = useState<TopScore[]>(initialScores)
   const [streamerScores, setStreamerScores] = useState<TopScore[]>(initialStreamerScores)
   const [isKickTheme, setIsKickTheme] = useState(false)
+  
+  // Crear/actualizar usuario en la base de datos
+  useUserCreation()
 
   useEffect(() => {
     // Función para actualizar los scores
