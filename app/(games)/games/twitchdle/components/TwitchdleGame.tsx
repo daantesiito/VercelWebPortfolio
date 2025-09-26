@@ -531,8 +531,8 @@ export default function TwitchdleGame() {
     )
   }
 
-  // Debug: Log modal states
-  console.log('🔍 Render states:', { showGameOverModal, showStatsScreen, showPostGame })
+  // Debug: Log modal states (removed to prevent infinite loop)
+  // console.log('🔍 Render states:', { showGameOverModal, showStatsScreen, showPostGame })
 
   return (
     <div className="twitchdle-container">

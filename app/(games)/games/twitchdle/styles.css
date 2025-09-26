@@ -565,7 +565,7 @@ h1 {
     align-items: center;
     justify-content: center;
   z-index: 1;
-  overflow: auto;
+    overflow: hidden;
   padding: 20px;
 }
 
@@ -577,6 +577,8 @@ h1 {
     width: 100%;
     text-align: center;
     box-shadow: none;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .stats-content h1 {
