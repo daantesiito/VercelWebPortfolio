@@ -43,20 +43,12 @@ export default function TwitchdleGame() {
   const keyboardRef = useRef<HTMLDivElement>(null)
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Palabras del día (una por día)
+  // Palabras del wordlist.txt
   const dailyWords = [
-    'TWITCH', 'STREAM', 'GAMER', 'CHAT', 'FOLLOWER', 'SUBSCRIBER', 'DONATION',
-    'EMOTE', 'MODERATOR', 'BAN', 'TIMEOUT', 'RAID', 'HOST', 'CLIP', 'HIGHLIGHT',
-    'VOD', 'REPLAY', 'LIVE', 'OFFLINE', 'ONLINE', 'VIEWER', 'AUDIENCE', 'COMMUNITY',
-    'INTERACTION', 'ENGAGEMENT', 'CONTENT', 'CREATOR', 'BROADCASTER', 'STREAMER',
-    'GAMING', 'ENTERTAINMENT', 'FUN', 'ENJOY', 'WATCH', 'PLAY', 'COMPETE', 'WIN',
-    'LOSE', 'SCORE', 'POINTS', 'LEVEL', 'ACHIEVEMENT', 'REWARD', 'PRIZE', 'GIFT',
-    'SUPPORT', 'HELP', 'ASSIST', 'GUIDE', 'TUTORIAL', 'LEARN', 'TEACH', 'SHARE',
-    'SOCIAL', 'NETWORK', 'CONNECT', 'FRIEND', 'BUDDY', 'TEAM', 'SQUAD', 'GROUP',
-    'PARTY', 'CELEBRATION', 'EVENT', 'TOURNAMENT', 'CHAMPIONSHIP', 'LEAGUE',
-    'RANKING', 'LEADERBOARD', 'TOP', 'BEST', 'GREAT', 'AMAZING', 'AWESOME',
-    'EPIC', 'LEGENDARY', 'MYTHICAL', 'RARE', 'UNIQUE', 'SPECIAL', 'EXCLUSIVE',
-    'PREMIUM', 'VIP', 'ELITE', 'PRO', 'EXPERT', 'MASTER', 'CHAMPION', 'WINNER'
+    'STREAM', 'SPREEN', 'LUKEN', 'COSCU', 'COBRA', 'DOU', 'SHELAO', 'BALDU', 'MOMO', 'IBAI',
+    'VOD', 'EMOTE', 'OBS', 'CHAT', 'RAID', 'PRIME', 'BAULO', 'NDEAH', 'BITS', 'PEEPO',
+    'FACTS', 'HOST', 'GONCHO', 'LURKER', 'SUB', 'IRL', 'ASMR', 'KNEKRO', 'NASHE', 'RUBIUS',
+    'BANEAR', 'GRAFO', 'TROLL', 'GODETO', 'PRENDE'
   ]
 
   // Generar palabra del día basada en la fecha
@@ -65,7 +57,9 @@ export default function TwitchdleGame() {
     const startDate = new Date('2024-12-12') // Fecha de inicio del juego
     const daysSinceStart = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
     const wordIndex = daysSinceStart % dailyWords.length
-    return dailyWords[wordIndex]
+    const word = dailyWords[wordIndex]
+    console.log('🎯 Palabra del día:', word, '(Longitud:', word.length + ')')
+    return word
   }
 
   // Inicializar el juego
@@ -74,6 +68,32 @@ export default function TwitchdleGame() {
       initializeGame()
     }
   }, [session?.user])
+
+  // Event listener para teclado físico
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (gameState.gameFinished || showPostGame) return
+
+      const key = event.key.toUpperCase()
+      
+      if (key === 'ENTER') {
+        event.preventDefault()
+        submitGuess()
+      } else if (key === 'BACKSPACE') {
+        event.preventDefault()
+        deleteLetter()
+      } else if (key.length === 1 && key.match(/[A-Z]/)) {
+        event.preventDefault()
+        addLetter(key)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [gameState.gameFinished, showPostGame, gameState.currentRow, gameState.currentCol, gameState.wordToGuess])
 
   const initializeGame = () => {
     const today = new Date().toDateString()
