@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitchdle</title>
+    <link rel="icon" type="image/png" href="https://github.com/daantesiito/daantesiito.github.io/blob/main/twitchdle/media/twitchLogo.png?raw=true"> <!-- Línea añadida para el favicon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Google Analytics (fuera de cualquier bloque de código de JS) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4CJBHXXVWY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+        gtag('config', 'G-4CJBHXXVWY');
+    </script>
+</head>
+<body>
+    <div id="emote-container"></div>
+    <h1>Twitchdle</h1>
+    <div id="userInfo" class="hidden">
+        <img id="userAvatar" src="" alt="User Avatar" />
+        <span id="userName"></span>
+    </div>
+    <button id="loginWithTwitchButton">LOGIN CON TWITCH</button>
+    <div id="instructionsContainer">
+        <button id="instructionsToggleButton">INSTRUCCIONES</button>
+    </div>
+    <div id="instructionsModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="closeInstructionsModal" class="close">&times;</span>
+            <div id="instructionsContent">
+                <p>
+                    El objetivo del juego es simple, adivinar la palabra oculta. La palabra puede tener entre 3 y 7 letras y tenes 6 intentos para adivinarla.
+                </p>
+                <p> 
+                    La tematica es de twitch/kick o el ambiente del streaming en si. La palabra puede ser un streamer u otra cosa relacionada con el stream.
+                </p>
+                <p> 
+                    La palabra es la misma para todas las personas en ese día. Cada intento debe ser una palabra válida. En cada ronda, el juego 
+                    pinta cada letra de un color indicando si esa letra se encuentra o no en la palabra y si está en la posición correcta.
+                </p>
+                <p>
+                    <span style="color: var(--col-correct); font-weight: bold;">VERDE</span> 
+                    significa que la letra está en la palabra y en la posición CORRECTA 
+                    <img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/twitchdle/media/VERDE.png?raw=true" alt="Letra verde" class="instruction-icon">
+                </p>
+                <p>
+                    <span style="color: var(--col-present); font-weight: bold;">AMARILLO</span> 
+                    significa que la letra está presente en la palabra pero en la posición INCORRECTA 
+                    <img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/twitchdle/media/AMARILLO.png?raw=true" alt="Letra amarilla" class="instruction-icon">
+                </p>
+                <p>
+                    <span style="color: var(--col-absent); font-weight: bold;">GRIS</span> 
+                    significa que la letra NO está presente en la palabra 
+                    <img src="https://github.com/daantesiito/daantesiito.github.io/blob/main/twitchdle/media/GRIS.png?raw=true" alt="Letra gris" class="instruction-icon">
+                </p>
+                <p> 
+                    Cualquier aporte de palabra para adivinar o si intentaste alguna palabra que pensas que tiene que estar en el diccionario para validarse, mandamela por discord: 326820001879162880
+                </p>
+                <p> 
+                    El login con twitch solo guarda tu nombre de usuario para poder usarlo como "cuenta" y que no se repita.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="container hidden">
+        <div id="board"></div>
+        <div id="keyboard"></div>
+        <div id="message" class="hidden"></div>
+        <div id="result" class="hidden"></div>
+    </div>
+    <div class="post-game hidden" id="postGame">
+        <h2>¡Ya jugaste!</h2>
+        <div id="postGameMessage"></div>
+        <div id="postGameCountdown"></div>
+        <div id="postGameStats"></div>
+        <div class="social-buttons">
+            <a href="https://github.com/daantesiito" target="_blank" class="social-button github"><i class="fab fa-github"></i></a>
+            <a href="https://cafecito.app/dantesiito" target="_blank" class="social-button cafecito"><i class="fas fa-coffee"></i></a>
+            <a href="https://www.instagram.com/dante_puddu/" target="_blank" class="social-button instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.twitch.tv/daantesiito" target="_blank" class="social-button twitch"><i class="fab fa-twitch"></i></a>
+            <a href="https://discordapp.com/users/326820001879162880" target="_blank" class="social-button discord"><i class="fab fa-discord"></i></a>
+        </div>
+    </div>
+    <div id="gameOverModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <p id="modalMessage"></p>
+            <p id="modalCountdown"></p>
+        </div>
+    </div>  
+
+    <!-- Scripts de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>   
+</body>
+</html>

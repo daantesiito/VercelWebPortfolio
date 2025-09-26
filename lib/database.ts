@@ -113,3 +113,24 @@ export async function upsertScore(userId: string, gameSlug: string, value: numbe
   const result = await query(queryText, [userId, gameSlug, value])
   return result.rows[0]
 }
+
+// Función para obtener scores de racha (streak)
+export async function getStreakScores(gameSlug: string, limit: number = 10) {
+  console.log('🔍 getStreakScores called with:', { gameSlug, limit })
+  
+  const queryText = `
+    SELECT 
+      s.value,
+      COALESCE(u."displayName", u.name) as displayName,
+      u."avatarUrl" as avatarUrl,
+      u."twitchLogin"
+    FROM "Score" s
+    JOIN "User" u ON s."userId" = u.id
+    WHERE s."gameSlug" = $1
+    ORDER BY s.value DESC LIMIT $2
+  `
+  
+  const result = await query(queryText, [gameSlug, limit])
+  console.log('🔍 getStreakScores result:', result.rows)
+  return result.rows
+}

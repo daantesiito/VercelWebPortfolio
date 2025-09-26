@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
-import { getTopScores, getTopStreamerScores, upsertBestScore, validateGameSlug, validateScoreValue } from '@/lib/scores'
+import { getTopScores, getTopStreamerScores, getTopStreakScores, upsertBestScore, validateGameSlug, validateScoreValue } from '@/lib/scores'
 
 const ScoreRequestSchema = z.object({
   game: z.string().min(1),
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const game = searchParams.get('game')
     const limit = parseInt(searchParams.get('limit') || '10')
     const streamersOnly = searchParams.get('streamers') === 'true'
+    const streakOnly = searchParams.get('streak') === 'true'
 
     if (!game || !validateGameSlug(game)) {
       return NextResponse.json(
@@ -30,9 +31,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const scores = streamersOnly 
-      ? await getTopStreamerScores(game, limit)
-      : await getTopScores(game, limit)
+    let scores
+    if (streakOnly) {
+      scores = await getTopStreakScores(game, limit)
+    } else if (streamersOnly) {
+      scores = await getTopStreamerScores(game, limit)
+    } else {
+      scores = await getTopScores(game, limit)
+    }
     
     return NextResponse.json(scores)
   } catch (error) {

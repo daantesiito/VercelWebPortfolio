@@ -64,6 +64,25 @@ export function validateGameSlug(gameSlug: string): boolean {
   return validGames.includes(gameSlug)
 }
 
+export async function getTopStreakScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
+  try {
+    console.log(`🔍 getTopStreakScores: Fetching ${limit} streak scores for game ${gameSlug}`);
+    const { getStreakScores } = await import('./database')
+    const scores = await getStreakScores(gameSlug, limit)
+
+    console.log(`✅ getTopStreakScores: Found ${scores.length} streak scores`);
+    return scores.map((score: any) => ({
+      displayName: score.displayname || score.displayName || 'Anonymous',
+      avatarUrl: score.avatarurl || score.avatarUrl,
+      twitchLogin: score.twitchLogin || 'unknown',
+      value: score.value,
+    }))
+  } catch (error) {
+    console.error('❌ getTopStreakScores error:', error);
+    return [];
+  }
+}
+
 export function validateScoreValue(value: number): boolean {
   return Number.isInteger(value) && value >= 0 && value <= 1e9
 }
