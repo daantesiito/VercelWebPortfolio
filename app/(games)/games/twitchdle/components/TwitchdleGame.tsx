@@ -202,9 +202,13 @@ export default function TwitchdleGame() {
   }
 
   const showPostGameScreen = (gameData: any) => {
+    console.log('🎮 showPostGameScreen called:', gameData)
     setShowPostGame(true)
     setPostGameMessage(gameData.won ? '¡Felicidades! ¡Adivinaste la palabra!' : '¡Mejor suerte mañana!')
     setPostGameStats(`Racha actual: ${gameData.streak || 0} | Mejor racha: ${gameData.maxStreak || 0}`)
+    
+    // Asegurar que el modal viejo NO se muestre
+    setShowGameOverModal(false)
     
     // Mostrar pantalla de estadísticas directamente
     setShowStatsScreen(true)
