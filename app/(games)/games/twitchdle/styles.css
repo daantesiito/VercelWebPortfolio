@@ -564,7 +564,7 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: 1;
     overflow: hidden;
     padding: 20px;
 }
@@ -756,4 +756,35 @@ h1 {
 /* Stats screen specific styles */
 .stats-content .social-icons {
     margin-top: 30px;
+}
+
+/* Emote container styles - background animation */
+#emote-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1; /* Behind everything */
+  overflow: hidden;
+}
+
+.emote {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  animation: fall linear infinite;
+  pointer-events: none;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
 }
