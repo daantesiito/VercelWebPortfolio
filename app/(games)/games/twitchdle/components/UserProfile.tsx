@@ -1,32 +1,41 @@
 'use client'
+
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 
 export default function UserProfile() {
   const { data: session } = useSession()
 
-  if (!session || !session.user) {
+  if (!session) {
     return null
   }
 
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/games/twitchdle' })
+  }
+
   return (
-    <div className="fixed top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-xl border border-gray-200 z-100 flex items-center gap-3">
-      {session.user.image && (
+    <div className="fixed top-4 right-4 z-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-xl border border-gray-200">
+      {session.user?.image && (
         <Image
           src={session.user.image}
-          alt={session.user.name || 'User'}
-          width={32}
-          height={32}
+          alt={session.user.name || 'User Avatar'}
+          width={40}
+          height={40}
           className="rounded-full"
         />
       )}
-      <div className="text-gray-800">
-        <div className="font-semibold text-sm">{session.user.name}</div>
-        <div className="text-xs text-gray-500">{session.user.name}</div>
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-gray-800">
+          {session.user?.name || 'Jugador'}
+        </span>
+        <span className="text-xs text-gray-500">
+          @{session.user?.name?.toLowerCase().replace(/\s+/g, '') || 'player'}
+        </span>
       </div>
       <button
-        onClick={() => signOut({ callbackUrl: '/games/twitchdle' })}
-        className="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg text-xs transition-colors duration-200"
+        onClick={handleLogout}
+        className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-3 py-1.5 rounded-md transition-colors"
       >
         Logout
       </button>

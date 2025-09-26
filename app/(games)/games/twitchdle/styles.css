@@ -564,9 +564,9 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
-    overflow: hidden;
-    padding: 20px;
+  z-index: 1;
+  overflow: auto;
+  padding: 20px;
 }
 
 .stats-content {

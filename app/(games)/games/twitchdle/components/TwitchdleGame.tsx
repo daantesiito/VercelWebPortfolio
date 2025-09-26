@@ -137,10 +137,10 @@ export default function TwitchdleGame() {
     }
   }, [gameState.gameFinished, showPostGame, gameState.currentRow, gameState.currentCol, gameState.wordToGuess])
 
-  // Debug: Monitor state changes
-  useEffect(() => {
-    console.log('🔄 State changed:', { showGameOverModal, showStatsScreen, showPostGame })
-  }, [showGameOverModal, showStatsScreen, showPostGame])
+  // Debug: Monitor state changes (removed to prevent infinite loop)
+  // useEffect(() => {
+  //   console.log('🔄 State changed:', { showGameOverModal, showStatsScreen, showPostGame })
+  // }, [showGameOverModal, showStatsScreen, showPostGame])
 
   const initializeGame = () => {
     const today = new Date().toDateString()
