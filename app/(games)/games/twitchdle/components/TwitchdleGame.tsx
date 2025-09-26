@@ -42,6 +42,7 @@ export default function TwitchdleGame() {
   const boardRef = useRef<HTMLDivElement>(null)
   const keyboardRef = useRef<HTMLDivElement>(null)
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
+  const gameInitialized = useRef(false)
 
   // Palabras del wordlist.txt
   const dailyWords = [
@@ -64,7 +65,9 @@ export default function TwitchdleGame() {
 
   // Inicializar el juego
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user && !gameInitialized.current) {
+      console.log('🔧 Inicializando juego por primera vez...')
+      gameInitialized.current = true
       initializeGame()
     }
   }, [session?.user])
@@ -103,9 +106,19 @@ export default function TwitchdleGame() {
     
     const wordToGuess = getDailyWord()
     
+    console.log('🔧 initializeGame called:', {
+      today,
+      lastPlayedDate,
+      gameFinished,
+      hasSavedGame: !!savedGame,
+      wordToGuess,
+      wordLength: wordToGuess.length
+    })
+    
     if (savedGame && lastPlayedDate === today && gameFinished === 'false') {
       // Cargar juego guardado
       const gameData = JSON.parse(savedGame)
+      console.log('📁 Cargando juego guardado:', gameData)
       setGameState({
         ...gameData,
         wordToGuess
@@ -113,9 +126,11 @@ export default function TwitchdleGame() {
     } else if (lastPlayedDate === today && gameFinished === 'true') {
       // Mostrar pantalla de post-juego
       const gameData = JSON.parse(savedGame || '{}')
+      console.log('🎮 Mostrando pantalla de post-juego:', gameData)
       showPostGameScreen(gameData)
     } else {
       // Nuevo juego
+      console.log('🆕 Creando nuevo juego')
       localStorage.setItem('twitchdleLastPlayedDate', today)
       localStorage.setItem('twitchdleGameFinished', 'false')
       
@@ -357,6 +372,8 @@ export default function TwitchdleGame() {
       if (countdownRef.current) {
         clearInterval(countdownRef.current)
       }
+      // Reset initialization flag when component unmounts
+      gameInitialized.current = false
     }
   }, [])
 
