@@ -137,6 +137,11 @@ export default function TwitchdleGame() {
     }
   }, [gameState.gameFinished, showPostGame, gameState.currentRow, gameState.currentCol, gameState.wordToGuess])
 
+  // Debug: Monitor state changes
+  useEffect(() => {
+    console.log('🔄 State changed:', { showGameOverModal, showStatsScreen, showPostGame })
+  }, [showGameOverModal, showStatsScreen, showPostGame])
+
   const initializeGame = () => {
     const today = new Date().toDateString()
     const savedGame = localStorage.getItem('twitchdleGame')
@@ -361,6 +366,7 @@ export default function TwitchdleGame() {
   }
 
   const handleWin = async () => {
+    console.log('🏆 handleWin called - this should NOT happen on page reload!')
     const newStreak = gameState.streak + 1
     const newMaxStreak = Math.max(newStreak, gameState.maxStreak)
     const attempts = gameState.currentRow + 1
@@ -397,6 +403,7 @@ export default function TwitchdleGame() {
   }
 
   const handleLose = async () => {
+    console.log('💀 handleLose called - this should NOT happen on page reload!')
     const gameData = {
       ...gameState,
       gameFinished: true,
