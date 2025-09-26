@@ -208,9 +208,11 @@ export default function TwitchdleGame() {
     setPostGameStats(`Racha actual: ${gameData.streak || 0} | Mejor racha: ${gameData.maxStreak || 0}`)
     
     // Asegurar que el modal viejo NO se muestre
+    console.log('🚫 Setting showGameOverModal to false')
     setShowGameOverModal(false)
     
     // Mostrar pantalla de estadísticas directamente
+    console.log('📊 Setting showStatsScreen to true')
     setShowStatsScreen(true)
     
     // Countdown para el próximo juego
@@ -522,6 +524,9 @@ export default function TwitchdleGame() {
     )
   }
 
+  // Debug: Log modal states
+  console.log('🔍 Render states:', { showGameOverModal, showStatsScreen, showPostGame })
+
   return (
     <div className="twitchdle-container">
       <div id="emote-container"></div>
@@ -637,6 +642,7 @@ export default function TwitchdleGame() {
         <div className="modal">
           <div className="modal-content">
             <span className="close" onClick={() => {
+              console.log('❌ Modal close clicked')
               setShowGameOverModal(false)
               setShowStatsScreen(true)
             }}>&times;</span>
