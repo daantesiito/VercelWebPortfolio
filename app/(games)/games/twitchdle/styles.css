@@ -324,6 +324,8 @@ h1 {
   padding: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   width: 240px;
+  z-index: 100;
+  position: relative;
 }
 
 .leaderboard-container h3 {
@@ -558,23 +560,23 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--col-bg);
+    background: #c096ff;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    overflow-y: auto;
+    z-index: 50;
+    overflow: hidden;
     padding: 20px;
 }
 
 .stats-content {
-    background: white;
+    background: transparent;
     border-radius: 12px;
     padding: 30px;
     max-width: 500px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 .stats-content h1 {

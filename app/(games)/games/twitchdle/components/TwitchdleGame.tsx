@@ -523,7 +523,7 @@ export default function TwitchdleGame() {
       <div id="emote-container"></div>
       <h1>Twitchdle</h1>
       
-      <div className="instructions-container" style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 10 }}>
+      <div className="instructions-container" style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 100 }}>
         <button 
           className="instructions-toggle-button"
           onClick={() => setShowInstructions(!showInstructions)}

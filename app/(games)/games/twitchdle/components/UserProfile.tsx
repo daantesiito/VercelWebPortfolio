@@ -10,7 +10,7 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="fixed top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-xl border border-gray-200 z-20 flex items-center gap-3">
+    <div className="fixed top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-xl border border-gray-200 z-100 flex items-center gap-3">
       {session.user.image && (
         <Image
           src={session.user.image}
