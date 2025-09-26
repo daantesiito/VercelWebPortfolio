@@ -142,7 +142,7 @@ export default function TwitchdleGame() {
   //   console.log('🔄 State changed:', { showGameOverModal, showStatsScreen, showPostGame })
   // }, [showGameOverModal, showStatsScreen, showPostGame])
 
-  // Hide leaderboard when stats screen is shown
+  // Prevent body scroll when stats screen is shown
   useEffect(() => {
     if (showStatsScreen) {
       document.body.classList.add('stats-screen-active')
