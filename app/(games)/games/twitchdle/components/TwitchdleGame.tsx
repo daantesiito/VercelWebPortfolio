@@ -166,6 +166,20 @@ export default function TwitchdleGame() {
       // Mostrar pantalla de post-juego
       const gameData = JSON.parse(savedGame || '{}')
       console.log('🎮 Mostrando pantalla de post-juego:', gameData)
+      
+      // Cargar estadísticas existentes
+      const existingStats = JSON.parse(localStorage.getItem('twitchdleStats') || '{"gamesPlayed": 0, "victories": 0, "currentStreak": 0, "maxStreak": 0, "guessDistribution": [0, 0, 0, 0, 0, 0]}')
+      
+      // Generar esquema de emojis
+      const emojiGrid = generateEmojiGrid(gameData.board, gameData.wordToGuess.length)
+      
+      // Actualizar estado de estadísticas
+      setGameStats({
+        ...existingStats,
+        lastGameResult: gameData,
+        emojiGrid
+      })
+      
       showPostGameScreen(gameData)
     } else {
       // Nuevo juego
@@ -192,9 +206,8 @@ export default function TwitchdleGame() {
     setPostGameMessage(gameData.won ? '¡Felicidades! ¡Adivinaste la palabra!' : '¡Mejor suerte mañana!')
     setPostGameStats(`Racha actual: ${gameData.streak || 0} | Mejor racha: ${gameData.maxStreak || 0}`)
     
-    // Mostrar modal de ganaste/perdiste
-    setModalMessage(gameData.won ? `¡Felicidades! ¡Adivinaste la palabra: "${gameData.wordToGuess}"!` : `No lograste acertar, palabra correcta: "${gameData.wordToGuess}"`)
-    setShowGameOverModal(true)
+    // Mostrar pantalla de estadísticas directamente
+    setShowStatsScreen(true)
     
     // Countdown para el próximo juego
     startCountdown()
@@ -368,7 +381,13 @@ export default function TwitchdleGame() {
     await saveStreakToDatabase(newStreak)
     
     setGameState(prev => ({ ...prev, gameFinished: true }))
-    showPostGameScreen(gameData)
+    
+    // Mostrar modal primero
+    setModalMessage(`¡Felicidades! ¡Adivinaste la palabra: "${gameData.wordToGuess}"!`)
+    setShowGameOverModal(true)
+    
+    // Countdown para el próximo juego
+    startCountdown()
   }
 
   const handleLose = async () => {
@@ -390,7 +409,13 @@ export default function TwitchdleGame() {
     updateGameStats(gameData, false, 6)
     
     setGameState(prev => ({ ...prev, gameFinished: true }))
-    showPostGameScreen(gameData)
+    
+    // Mostrar modal primero
+    setModalMessage(`No lograste acertar, palabra correcta: "${gameData.wordToGuess}"`)
+    setShowGameOverModal(true)
+    
+    // Countdown para el próximo juego
+    startCountdown()
   }
 
   const updateGameStats = (gameData: any, won: boolean, attempts: number) => {
