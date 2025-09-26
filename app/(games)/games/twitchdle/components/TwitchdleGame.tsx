@@ -142,6 +142,20 @@ export default function TwitchdleGame() {
   //   console.log('🔄 State changed:', { showGameOverModal, showStatsScreen, showPostGame })
   // }, [showGameOverModal, showStatsScreen, showPostGame])
 
+  // Hide leaderboard when stats screen is shown
+  useEffect(() => {
+    if (showStatsScreen) {
+      document.body.classList.add('stats-screen-active')
+    } else {
+      document.body.classList.remove('stats-screen-active')
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('stats-screen-active')
+    }
+  }, [showStatsScreen])
+
   const initializeGame = () => {
     const today = new Date().toDateString()
     const savedGame = localStorage.getItem('twitchdleGame')

@@ -62,8 +62,8 @@ export default function TwitchdleWithLeaderboard({ initialStreakScores }: Twitch
         {/* Perfil de usuario en la esquina superior derecha */}
         <UserProfile />
         
-        {/* Leaderboard de racha en el medio izquierda */}
-        <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-10">
+        {/* Leaderboard de racha en el medio izquierda - solo visible cuando NO hay stats screen */}
+        <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-10" id="leaderboard-container">
           <TopScores scores={streakScores} game="twitchdle" title="TOP RACHA" />
         </div>
       </div>
