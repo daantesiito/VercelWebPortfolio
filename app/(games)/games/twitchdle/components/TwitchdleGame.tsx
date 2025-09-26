@@ -38,6 +38,16 @@ export default function TwitchdleGame() {
   const [showGameOverModal, setShowGameOverModal] = useState(false)
   const [modalMessage, setModalMessage] = useState('')
   const [modalCountdown, setModalCountdown] = useState('')
+  const [showStatsScreen, setShowStatsScreen] = useState(false)
+  const [gameStats, setGameStats] = useState({
+    gamesPlayed: 0,
+    victories: 0,
+    currentStreak: 0,
+    maxStreak: 0,
+    guessDistribution: [0, 0, 0, 0, 0, 0],
+    lastGameResult: null as any,
+    emojiGrid: ''
+  })
   
   const boardRef = useRef<HTMLDivElement>(null)
   const keyboardRef = useRef<HTMLDivElement>(null)
@@ -61,6 +71,35 @@ export default function TwitchdleGame() {
     const word = dailyWords[wordIndex]
     console.log('🎯 Palabra del día:', word, '(Longitud:', word.length + ')')
     return word
+  }
+
+  const generateEmojiGrid = (board: string[][], wordLength: number) => {
+    let emojiGrid = ''
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < wordLength; col++) {
+        const cell = board[row][col]
+        if (cell && cell.includes(':')) {
+          const [, color] = cell.split(':')
+          switch (color) {
+            case 'correct':
+              emojiGrid += '🟩'
+              break
+            case 'present':
+              emojiGrid += '🟨'
+              break
+            case 'absent':
+              emojiGrid += '⬛'
+              break
+            default:
+              emojiGrid += '⬛'
+          }
+        } else {
+          emojiGrid += '⬛'
+        }
+      }
+      if (row < 5) emojiGrid += '\n'
+    }
+    return emojiGrid
   }
 
   // Inicializar el juego
@@ -152,6 +191,10 @@ export default function TwitchdleGame() {
     setShowPostGame(true)
     setPostGameMessage(gameData.won ? '¡Felicidades! ¡Adivinaste la palabra!' : '¡Mejor suerte mañana!')
     setPostGameStats(`Racha actual: ${gameData.streak || 0} | Mejor racha: ${gameData.maxStreak || 0}`)
+    
+    // Mostrar modal de ganaste/perdiste
+    setModalMessage(gameData.won ? `¡Felicidades! ¡Adivinaste la palabra: "${gameData.wordToGuess}"!` : `No lograste acertar, palabra correcta: "${gameData.wordToGuess}"`)
+    setShowGameOverModal(true)
     
     // Countdown para el próximo juego
     startCountdown()
@@ -301,13 +344,15 @@ export default function TwitchdleGame() {
   const handleWin = async () => {
     const newStreak = gameState.streak + 1
     const newMaxStreak = Math.max(newStreak, gameState.maxStreak)
+    const attempts = gameState.currentRow + 1
     
     const gameData = {
       ...gameState,
       gameFinished: true,
       won: true,
       streak: newStreak,
-      maxStreak: newMaxStreak
+      maxStreak: newMaxStreak,
+      attempts
     }
     
     // Guardar en localStorage
@@ -315,6 +360,9 @@ export default function TwitchdleGame() {
     localStorage.setItem('twitchdleGameFinished', 'true')
     localStorage.setItem('twitchdleStreak', newStreak.toString())
     localStorage.setItem('twitchdleMaxStreak', newMaxStreak.toString())
+    
+    // Actualizar estadísticas
+    updateGameStats(gameData, true, attempts)
     
     // Guardar en la base de datos
     await saveStreakToDatabase(newStreak)
@@ -329,7 +377,8 @@ export default function TwitchdleGame() {
       gameFinished: true,
       won: false,
       streak: 0, // Reset streak on loss
-      maxStreak: gameState.maxStreak
+      maxStreak: gameState.maxStreak,
+      attempts: 6
     }
     
     // Guardar en localStorage
@@ -337,8 +386,43 @@ export default function TwitchdleGame() {
     localStorage.setItem('twitchdleGameFinished', 'true')
     localStorage.setItem('twitchdleStreak', '0')
     
+    // Actualizar estadísticas
+    updateGameStats(gameData, false, 6)
+    
     setGameState(prev => ({ ...prev, gameFinished: true }))
     showPostGameScreen(gameData)
+  }
+
+  const updateGameStats = (gameData: any, won: boolean, attempts: number) => {
+    // Cargar estadísticas existentes
+    const existingStats = JSON.parse(localStorage.getItem('twitchdleStats') || '{"gamesPlayed": 0, "victories": 0, "currentStreak": 0, "maxStreak": 0, "guessDistribution": [0, 0, 0, 0, 0, 0]}')
+    
+    // Actualizar estadísticas
+    const newStats = {
+      gamesPlayed: existingStats.gamesPlayed + 1,
+      victories: won ? existingStats.victories + 1 : existingStats.victories,
+      currentStreak: gameData.streak,
+      maxStreak: gameData.maxStreak,
+      guessDistribution: [...existingStats.guessDistribution]
+    }
+    
+    // Actualizar distribución de intentos (solo si ganó)
+    if (won && attempts >= 1 && attempts <= 6) {
+      newStats.guessDistribution[attempts - 1]++
+    }
+    
+    // Generar esquema de emojis
+    const emojiGrid = generateEmojiGrid(gameData.board, gameData.wordToGuess.length)
+    
+    // Guardar estadísticas actualizadas
+    localStorage.setItem('twitchdleStats', JSON.stringify(newStats))
+    
+    // Actualizar estado
+    setGameStats({
+      ...newStats,
+      lastGameResult: gameData,
+      emojiGrid
+    })
   }
 
   const saveStreakToDatabase = async (streak: number) => {
@@ -523,9 +607,139 @@ export default function TwitchdleGame() {
       {showGameOverModal && (
         <div className="modal">
           <div className="modal-content">
-            <span className="close" onClick={() => setShowGameOverModal(false)}>&times;</span>
+            <span className="close" onClick={() => {
+              setShowGameOverModal(false)
+              setShowStatsScreen(true)
+            }}>&times;</span>
             <p>{modalMessage}</p>
             <p>{modalCountdown}</p>
+            
+            {/* Iconos de redes sociales */}
+            <div className="social-icons">
+              <a href="https://github.com/daantesiito" target="_blank" rel="noopener noreferrer" className="social-icon github">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </a>
+              <a href="https://ko-fi.com/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon kofi">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798S-.238 6.45.026 8.948c.164 1.52.54 3.042 1.363 4.411 1.502 2.554 4.57 4.004 7.926 4.004 3.356 0 6.424-1.45 7.926-4.004.823-1.369 1.199-2.891 1.363-4.411zm-11.89 5.418c-1.462 0-2.654-1.192-2.654-2.654s1.192-2.654 2.654-2.654 2.654 1.192 2.654 2.654-1.192 2.654-2.654 2.654z"/>
+                </svg>
+              </a>
+              <a href="https://instagram.com/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon instagram">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a href="https://twitch.tv/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon twitch">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                </svg>
+              </a>
+              <a href="https://discord.gg/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon discord">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pantalla de estadísticas */}
+      {showStatsScreen && (
+        <div className="stats-screen">
+          <div className="stats-content">
+            <h1>Twitchdle</h1>
+            <h2>¡Ya jugaste!</h2>
+            
+            {gameStats.lastGameResult && (
+              <>
+                <p className="game-result">
+                  {gameStats.lastGameResult.won 
+                    ? `¡Felicidades! ¡Adivinaste la palabra: "${gameStats.lastGameResult.wordToGuess}"!`
+                    : `No lograste acertar, palabra correcta: "${gameStats.lastGameResult.wordToGuess}"`
+                  }
+                </p>
+                
+                <div className="emoji-grid">
+                  <pre>{gameStats.emojiGrid}</pre>
+                </div>
+                
+                <p className="next-word-countdown">{modalCountdown}</p>
+                
+                <div className="stats-section">
+                  <h3>Estadísticas</h3>
+                  <div className="stats-grid">
+                    <div className="stat-item">
+                      <div className="stat-label">Jugadas:</div>
+                      <div className="stat-value">{gameStats.gamesPlayed}</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-label">Victorias:</div>
+                      <div className="stat-value">{gameStats.gamesPlayed > 0 ? ((gameStats.victories / gameStats.gamesPlayed) * 100).toFixed(2) : '0.00'}%</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-label">Racha Actual:</div>
+                      <div className="stat-value">{gameStats.currentStreak}</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-label">Mejor Racha:</div>
+                      <div className="stat-value">{gameStats.maxStreak}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="guess-distribution">
+                    <h4>Distribución de intentos:</h4>
+                    {gameStats.guessDistribution.map((count, index) => (
+                      <div key={index} className="guess-row">
+                        <span className="guess-number">{index + 1}:</span>
+                        <div className="guess-bar">
+                          <div 
+                            className="guess-fill" 
+                            style={{ 
+                              width: gameStats.gamesPlayed > 0 ? `${(count / gameStats.gamesPlayed) * 100}%` : '0%' 
+                            }}
+                          ></div>
+                        </div>
+                        <span className="guess-count">
+                          {count} ({gameStats.gamesPlayed > 0 ? ((count / gameStats.gamesPlayed) * 100).toFixed(2) : '0.00'}%)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Iconos de redes sociales */}
+                <div className="social-icons">
+                  <a href="https://github.com/daantesiito" target="_blank" rel="noopener noreferrer" className="social-icon github">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                  </a>
+                  <a href="https://ko-fi.com/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon kofi">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798S-.238 6.45.026 8.948c.164 1.52.54 3.042 1.363 4.411 1.502 2.554 4.57 4.004 7.926 4.004 3.356 0 6.424-1.45 7.926-4.004.823-1.369 1.199-2.891 1.363-4.411zm-11.89 5.418c-1.462 0-2.654-1.192-2.654-2.654s1.192-2.654 2.654-2.654 2.654 1.192 2.654 2.654-1.192 2.654-2.654 2.654z"/>
+                    </svg>
+                  </a>
+                  <a href="https://instagram.com/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon instagram">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                  </a>
+                  <a href="https://twitch.tv/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon twitch">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                    </svg>
+                  </a>
+                  <a href="https://discord.gg/dantesito" target="_blank" rel="noopener noreferrer" className="social-icon discord">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                    </svg>
+                  </a>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
