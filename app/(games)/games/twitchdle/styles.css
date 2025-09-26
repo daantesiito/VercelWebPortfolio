@@ -577,7 +577,6 @@ h1 {
     width: 100%;
     text-align: center;
     box-shadow: none;
-    max-height: 90vh;
     overflow-y: auto;
 }
 
@@ -758,6 +757,66 @@ h1 {
 /* Stats screen specific styles */
 .stats-content .social-icons {
     margin-top: 30px;
+}
+
+/* Social buttons - copied from 2048 */
+.twitchdle-game .social-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.twitchdle-game .social-button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: var(--col-white);
+  font-weight: bold;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.twitchdle-game .github {
+  background-color: #333;
+}
+
+.twitchdle-game .github:hover {
+  background-color: #555;
+}
+
+.twitchdle-game .cafecito {
+  background-color: #0077b6;
+}
+
+.twitchdle-game .cafecito:hover {
+  background-color: #0096c7;
+}
+
+.twitchdle-game .instagram {
+  background-color: #e1306c;
+}
+
+.twitchdle-game .instagram:hover {
+  background-color: #fd1d1d;
+}
+
+.twitchdle-game .twitch {
+  background-color: #6441a5;
+}
+
+.twitchdle-game .twitch:hover {
+  background-color: #9147ff;
+}
+
+.twitchdle-game .discord {
+  background-color: #7289da;
+}
+
+.twitchdle-game .discord:hover {
+  background-color: #5a6fb1;
 }
 
 /* Prevent body scroll when stats screen is shown */
