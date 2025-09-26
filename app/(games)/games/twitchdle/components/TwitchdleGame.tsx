@@ -231,9 +231,10 @@ export default function TwitchdleGame() {
     const evaluation = evaluateGuess(guess, gameState.wordToGuess)
     const newBoard = [...gameState.board]
     
-    // Aplicar colores a las letras
+    // Aplicar colores a las letras manteniendo la letra
     for (let i = 0; i < evaluation.length; i++) {
-      newBoard[gameState.currentRow][i] = evaluation[i]
+      const letter = newBoard[gameState.currentRow][i]
+      newBoard[gameState.currentRow][i] = `${letter}:${evaluation[i]}`
     }
 
     setGameState(prev => ({
@@ -396,7 +397,7 @@ export default function TwitchdleGame() {
       <div id="emote-container"></div>
       <h1>Twitchdle</h1>
       
-      <div className="instructions-container">
+      <div className="instructions-container" style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 10 }}>
         <button 
           className="instructions-toggle-button"
           onClick={() => setShowInstructions(!showInstructions)}
@@ -454,14 +455,21 @@ export default function TwitchdleGame() {
         >
           {gameState.board.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
-              {row.map((cell, colIndex) => (
-                <div 
-                  key={colIndex} 
-                  className={`cell ${cell.length > 1 ? cell : ''}`}
-                >
-                  {cell.length === 1 ? cell : ''}
-                </div>
-              ))}
+              {row.map((cell, colIndex) => {
+                // Si la celda tiene formato "letra:color", separar
+                const parts = cell.split(':')
+                const letter = parts[0]
+                const color = parts[1]
+                
+                return (
+                  <div 
+                    key={colIndex} 
+                    className={`cell ${color || ''}`}
+                  >
+                    {letter}
+                  </div>
+                )
+              })}
             </div>
           ))}
         </div>
