@@ -22,7 +22,7 @@ export default function UserProfile() {
       )}
       <div className="text-gray-800">
         <div className="font-semibold text-sm">{session.user.name}</div>
-        {session.user.twitchId && <div className="text-xs text-gray-500">@{session.user.twitchId}</div>}
+        <div className="text-xs text-gray-500">{session.user.name}</div>
       </div>
       <button
         onClick={() => signOut({ callbackUrl: '/games/twitchdle' })}

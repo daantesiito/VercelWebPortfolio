@@ -18,7 +18,7 @@ interface GameState {
 export default function TwitchdleGame() {
   const { data: session } = useSession()
   const [gameState, setGameState] = useState<GameState>({
-    board: Array(6).fill(null).map(() => Array(7).fill('')),
+    board: Array(6).fill(null).map(() => Array(5).fill('')), // 6 filas, 5 columnas por defecto
     currentRow: 0,
     currentCol: 0,
     gameFinished: false,
@@ -100,7 +100,7 @@ export default function TwitchdleGame() {
       localStorage.setItem('twitchdleGameFinished', 'false')
       
       setGameState({
-        board: Array(6).fill(null).map(() => Array(7).fill('')),
+        board: Array(6).fill(null).map(() => Array(wordToGuess.length).fill('')),
         currentRow: 0,
         currentCol: 0,
         gameFinished: false,
@@ -427,7 +427,11 @@ export default function TwitchdleGame() {
       )}
 
       <div className="container">
-        <div ref={boardRef} id="board">
+        <div 
+          ref={boardRef} 
+          id="board"
+          style={{ '--word-length': gameState.wordToGuess.length } as React.CSSProperties}
+        >
           {gameState.board.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((cell, colIndex) => (
@@ -443,25 +447,29 @@ export default function TwitchdleGame() {
         </div>
         
         <div ref={keyboardRef} id="keyboard">
-          {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(key => (
-            <button key={key} className="key" onClick={() => handleKeyPress(key)}>
-              {key}
-            </button>
-          ))}
-          <br />
-          {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].map(key => (
-            <button key={key} className="key" onClick={() => handleKeyPress(key)}>
-              {key}
-            </button>
-          ))}
-          <br />
-          <button className="key wide" onClick={() => handleKeyPress('ENTER')}>ENTER</button>
-          {['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(key => (
-            <button key={key} className="key" onClick={() => handleKeyPress(key)}>
-              {key}
-            </button>
-          ))}
-          <button className="key wide" onClick={() => handleKeyPress('BACKSPACE')}>⌫</button>
+          <div className="keyboard-row">
+            {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(key => (
+              <button key={key} className="key" onClick={() => handleKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].map(key => (
+              <button key={key} className="key" onClick={() => handleKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            <button className="key wide" onClick={() => handleKeyPress('ENTER')}>ENTER</button>
+            {['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(key => (
+              <button key={key} className="key" onClick={() => handleKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+            <button className="key wide" onClick={() => handleKeyPress('BACKSPACE')}>⌫</button>
+          </div>
         </div>
         
         {message && <div id="message">{message}</div>}
