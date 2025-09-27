@@ -25,14 +25,17 @@
 }
 
 .twitchdle-container {
+    margin-top: 2.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    position: relative;
+    z-index: 10; /* Above emotes */
 }
 
 .container {
-    margin-top: 50px;
+    margin-top: .5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -42,12 +45,12 @@ h1 {
     color: var(--col-primary);
     font-size: 48px;
     font-weight: 600;
-    margin: 20px 0;
-    margin-top: 50px;
+    margin-top: 20px;
 }
 
 #board {
     display: grid;
+    margin-top: 2.5rem;
     grid-template-columns: repeat(var(--word-length, 5), 60px);
     gap: 15px;
     justify-content: center;
@@ -192,28 +195,55 @@ h1 {
 
 .modal-content {
     background-color: var(--col-white);
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 600px;
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 500px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 10px 30px var(--col-shadow);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    text-align: center;
 }
 
 .close {
     position: absolute;
-    top: 15px;
+    top: 20px;
     right: 20px;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: bold;
     cursor: pointer;
     color: var(--col-primary);
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    line-height: 1;
 }
 
 .close:hover {
+    color: var(--col-white);
+    background-color: var(--col-primary);
+    transform: scale(1.1);
+}
+
+.modal-content p {
+    margin: 15px 0;
+    font-size: 18px;
+    line-height: 1.5;
     color: var(--col-primary-dark);
+}
+
+.modal-content p:first-child {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--col-primary);
+    margin-bottom: 20px;
 }
 
 .instructions-content p {
@@ -236,6 +266,7 @@ h1 {
     box-shadow: 0 10px 30px var(--col-shadow);
     margin: 20px;
     max-width: 500px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .post-game h2 {
@@ -274,12 +305,12 @@ h1 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    width: 60px;
+    height: 40px;
+    border-radius: 8px;
     text-decoration: none;
     color: var(--col-white);
-    font-size: 20px;
+    font-size: 18px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 8px var(--col-shadow);
 }
@@ -560,37 +591,36 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #e5d4ff;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-  z-index: 1;
+    z-index: 10;
     overflow: hidden;
-  padding: 20px;
+    padding: 20px;
 }
 
 .stats-content {
-    background: transparent;
-    border-radius: 12px;
-    padding: 30px;
+    padding: 10px;
     max-width: 500px;
     width: 100%;
     text-align: center;
-    box-shadow: none;
     overflow-y: auto;
+    position: relative;
+    z-index: 20;
 }
 
 .stats-content h1 {
     color: var(--col-primary);
-    font-size: 2.5rem;
+    font-size: 3rem;
     margin-bottom: 10px;
     font-weight: bold;
 }
 
 .stats-content h2 {
     color: var(--col-text);
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+    font-size: 2rem;
+    margin-bottom: 10px;
 }
 
 .game-result {
@@ -605,16 +635,14 @@ h1 {
     font-family: monospace;
     font-size: 1.2rem;
     line-height: 1.2;
-    background: #f8f9fa;
-    padding: 15px;
+    padding: 5px;
     border-radius: 8px;
-    border: 2px solid #e9ecef;
 }
 
 .next-word-countdown {
     color: var(--col-primary);
     font-size: 1rem;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     font-weight: 500;
 }
 
@@ -643,7 +671,7 @@ h1 {
     padding: 10px;
     background: #f8f9fa;
     border-radius: 8px;
-    border: 1px solid #e9ecef;
+    border: 1px solid black;
 }
 
 .stat-label {
@@ -756,28 +784,10 @@ h1 {
 
 /* Stats screen specific styles */
 .stats-content .social-icons {
-    margin-top: 30px;
+    margin-top: 5px;
 }
 
-/* Social buttons - copied from 2048 */
-.twitchdle-game .social-buttons {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
-.twitchdle-game .social-button {
-  padding: 10px 20px;
-  border-radius: 5px;
-  text-decoration: none;
-  color: var(--col-white);
-  font-weight: bold;
-  transition: background-color 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
+/* Social buttons - consistent styling */
 
 .twitchdle-game .github {
   background-color: #333;
@@ -831,26 +841,30 @@ body.stats-screen-active {
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: -1; /* Behind everything */
   overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .emote {
   position: absolute;
-  width: 40px;
-  height: 40px;
-  animation: fall linear infinite;
+  bottom: 100vh;
+  width: 6rem;
+  height: 3.5rem;
   pointer-events: none;
+  z-index: 15;
+  animation: fall linear infinite;
+  visibility: visible;
+  display: block;
 }
 
 @keyframes fall {
   0% {
-    transform: translateY(-100px);
+    transform: translateY(-100vh);
     opacity: 1;
   }
   100% {
     transform: translateY(100vh);
-    opacity: 0;
+    opacity: 0.1;
   }
 }

@@ -51,7 +51,7 @@ export function useUserCreation() {
         });
       }
     }
-  }, [status, session?.user?.id]); // Incluir session.user.id para evitar warning
+  }, [status]); // Solo status para evitar re-renders innecesarios
 
   return { session, status };
 }

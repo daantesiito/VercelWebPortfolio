@@ -73,9 +73,9 @@ export default function TwitchdleGame() {
     return word
   }
 
-  const generateEmojiGrid = (board: string[][], wordLength: number) => {
+  const generateEmojiGrid = (board: string[][], wordLength: number, attempts: number) => {
     let emojiGrid = ''
-    for (let row = 0; row < 6; row++) {
+    for (let row = 0; row < attempts; row++) {
       for (let col = 0; col < wordLength; col++) {
         const cell = board[row][col]
         if (cell && cell.includes(':')) {
@@ -97,7 +97,7 @@ export default function TwitchdleGame() {
           emojiGrid += '⬛'
         }
       }
-      if (row < 5) emojiGrid += '\n'
+      if (row < attempts - 1) emojiGrid += '\n'
     }
     return emojiGrid
   }
@@ -109,7 +109,7 @@ export default function TwitchdleGame() {
       gameInitialized.current = true
       initializeGame()
     }
-  }, [session?.user])
+  }, [session?.user?.id]) // Solo el ID para evitar re-renders
 
   // Event listener para teclado físico
   useEffect(() => {
@@ -156,9 +156,28 @@ export default function TwitchdleGame() {
     }
   }, [showStatsScreen])
 
+  // Guardar estado del juego en tiempo real
+  useEffect(() => {
+    console.log('🔍 useEffect guardar estado - gameState:', {
+      wordToGuess: gameState.wordToGuess,
+      gameFinished: gameState.gameFinished,
+      currentRow: gameState.currentRow,
+      won: gameState.won
+    })
+    
+    // Solo guardar si el juego está en progreso (no terminado y no ganado)
+    if (gameState.wordToGuess && !gameState.gameFinished && gameState.currentRow < 6 && !gameState.won) {
+      console.log('💾 Guardando estado del juego en tiempo real')
+      localStorage.setItem('twitchdleGame', JSON.stringify(gameState))
+    } else {
+      console.log('❌ No guardando estado - condiciones no cumplidas')
+    }
+  }, [gameState.wordToGuess, gameState.board, gameState.currentRow, gameState.currentCol, gameState.gameFinished, gameState.won])
+
   // Initialize emote rain animation
   useEffect(() => {
     const initEmoteRain = () => {
+      console.log('🎭 Initializing emote rain...');
       let numEmotes = 100;
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile) {
@@ -203,7 +222,11 @@ export default function TwitchdleGame() {
       ];
 
       const emoteContainer = document.getElementById('emote-container');
-      if (!emoteContainer) return;
+      if (!emoteContainer) {
+        console.log('❌ Emote container not found!');
+        return;
+      }
+      console.log('✅ Emote container found, creating', numEmotes, 'emotes');
 
       for (let i = 0; i < numEmotes; i++) {
         const emote = document.createElement('img');
@@ -211,9 +234,20 @@ export default function TwitchdleGame() {
         emote.className = 'emote';
         emote.style.left = Math.random() * 100 + '%';
         emote.style.animationDelay = Math.random() * 20 + 's';
-        emote.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        emote.style.animationDuration = (Math.random() * 5 + 5) + 's';
         emoteContainer.appendChild(emote);
+        
+        // Debug: verificar que el emote se creó correctamente
+        if (i === 0) {
+          console.log('🎭 First emote created:', {
+            src: emote.src,
+            className: emote.className,
+            style: emote.style.cssText,
+            computedStyle: window.getComputedStyle(emote)
+          });
+        }
       }
+      console.log('🎭 Created', numEmotes, 'emotes in container');
     };
 
     // Initialize emote rain after component mounts
@@ -230,6 +264,8 @@ export default function TwitchdleGame() {
   }, [])
 
   const initializeGame = () => {
+    console.log('🔧 initializeGame called - gameInitialized:', gameInitialized.current)
+    
     const today = new Date().toDateString()
     const savedGame = localStorage.getItem('twitchdleGame')
     const gameFinished = localStorage.getItem('twitchdleGameFinished')
@@ -237,33 +273,90 @@ export default function TwitchdleGame() {
     
     const wordToGuess = getDailyWord()
     
+    // --- NUEVA LÓGICA: Manejar el cambio de día explícitamente ---
+    if (lastPlayedDate !== today) {
+      console.log('🆕 Nuevo día detectado. Reiniciando juego y limpiando datos anteriores.')
+      localStorage.removeItem('twitchdleGame') // Borrar el juego guardado anterior
+      localStorage.setItem('twitchdleLastPlayedDate', today)
+      localStorage.setItem('twitchdleGameFinished', 'false')
+      
+      setGameState({
+        board: Array(6).fill(null).map(() => Array(wordToGuess.length).fill('')),
+        currentRow: 0,
+        currentCol: 0,
+        gameFinished: false,
+        wordToGuess,
+        attempts: 0,
+        streak: parseInt(localStorage.getItem('twitchdleStreak') || '0'),
+        maxStreak: parseInt(localStorage.getItem('twitchdleMaxStreak') || '0'),
+        lastPlayedDate: today
+      })
+      return; // Salir de la función, ya hemos inicializado el juego para el nuevo día
+    }
+
+    // --- VERIFICAR SI EL JUEGO GUARDADO ES DEL DÍA CORRECTO ---
+    if (savedGame) {
+      try {
+        const gameData = JSON.parse(savedGame)
+        if (gameData.lastPlayedDate !== today) {
+          console.log('🆕 Juego guardado es de otro día. Limpiando y creando nuevo juego.')
+          localStorage.removeItem('twitchdleGame')
+          localStorage.setItem('twitchdleLastPlayedDate', today)
+          localStorage.setItem('twitchdleGameFinished', 'false')
+          
+          setGameState({
+            board: Array(6).fill(null).map(() => Array(wordToGuess.length).fill('')),
+            currentRow: 0,
+            currentCol: 0,
+            gameFinished: false,
+            wordToGuess,
+            attempts: 0,
+            streak: parseInt(localStorage.getItem('twitchdleStreak') || '0'),
+            maxStreak: parseInt(localStorage.getItem('twitchdleMaxStreak') || '0'),
+            lastPlayedDate: today
+          })
+          return; // Salir de la función
+        }
+      } catch (error) {
+        console.log('❌ Error parsing saved game, creating new game')
+        localStorage.removeItem('twitchdleGame')
+      }
+    }
+    // --- FIN VERIFICACIÓN ---
+    
     console.log('🔧 initializeGame called:', {
       today,
       lastPlayedDate,
       gameFinished,
       hasSavedGame: !!savedGame,
       wordToGuess,
-      wordLength: wordToGuess.length
+      wordLength: wordToGuess.length,
+      isSameDay: lastPlayedDate === today,
+      isGameFinished: gameFinished === 'true'
     })
     
     if (savedGame && lastPlayedDate === today && gameFinished === 'false') {
-      // Cargar juego guardado
+      // Cargar juego guardado del mismo día
       const gameData = JSON.parse(savedGame)
       console.log('📁 Cargando juego guardado:', gameData)
       setGameState({
         ...gameData,
         wordToGuess
       })
-    } else if (lastPlayedDate === today && gameFinished === 'true') {
-      // Mostrar pantalla de post-juego
-      const gameData = JSON.parse(savedGame || '{}')
+    } else if (savedGame && lastPlayedDate === today && gameFinished === 'true') {
+      // Mostrar pantalla de post-juego del mismo día
+      const gameData = JSON.parse(savedGame)
       console.log('🎮 Mostrando pantalla de post-juego:', gameData)
+      console.log('🎮 gameData.gameFinished:', gameData.gameFinished)
+      console.log('🎮 gameData.won:', gameData.won)
+      console.log('🎮 gameData.attempts:', gameData.attempts)
+      console.log('🎮 gameData.currentRow:', gameData.currentRow)
       
       // Cargar estadísticas existentes
       const existingStats = JSON.parse(localStorage.getItem('twitchdleStats') || '{"gamesPlayed": 0, "victories": 0, "currentStreak": 0, "maxStreak": 0, "guessDistribution": [0, 0, 0, 0, 0, 0]}')
       
       // Generar esquema de emojis
-      const emojiGrid = generateEmojiGrid(gameData.board, gameData.wordToGuess.length)
+      const emojiGrid = generateEmojiGrid(gameData.board, gameData.wordToGuess.length, gameData.attempts)
       
       // Actualizar estado de estadísticas
       setGameStats({
@@ -275,7 +368,29 @@ export default function TwitchdleGame() {
       showPostGameScreen(gameData)
     } else {
       // Nuevo juego
-      console.log('🆕 Creando nuevo juego')
+      console.log('🆕 Creando nuevo juego - Condiciones:', {
+        hasSavedGame: !!savedGame,
+        isSameDay: lastPlayedDate === today,
+        isGameFinished: gameFinished === 'true',
+        condition1: savedGame && lastPlayedDate === today && gameFinished === 'false',
+        condition2: savedGame && lastPlayedDate === today && gameFinished === 'true'
+      })
+      
+      // Verificar si ya hay un juego guardado con won: true para evitar sobrescribirlo
+      if (savedGame) {
+        try {
+          const existingGameData = JSON.parse(savedGame)
+          if (existingGameData.won === true) {
+            console.log('🚫 Juego ya ganado detectado, no sobrescribir:', existingGameData)
+            return
+          }
+        } catch (error) {
+          console.log('❌ Error parsing existing game data:', error)
+        }
+      }
+      
+      // Limpiar localStorage del juego anterior
+      localStorage.removeItem('twitchdleGame')
       localStorage.setItem('twitchdleLastPlayedDate', today)
       localStorage.setItem('twitchdleGameFinished', 'false')
       
@@ -468,6 +583,9 @@ export default function TwitchdleGame() {
     }
     
     // Guardar en localStorage
+    console.log('💾 Guardando gameData en handleWin:', gameData)
+    console.log('💾 gameData.won:', gameData.won)
+    console.log('💾 gameData.gameFinished:', gameData.gameFinished)
     localStorage.setItem('twitchdleGame', JSON.stringify(gameData))
     localStorage.setItem('twitchdleGameFinished', 'true')
     localStorage.setItem('twitchdleStreak', newStreak.toString())
@@ -479,7 +597,11 @@ export default function TwitchdleGame() {
     // Guardar en la base de datos
     await saveStreakToDatabase(newStreak)
     
-    setGameState(prev => ({ ...prev, gameFinished: true }))
+    setGameState(prev => {
+      const newState = { ...prev, gameFinished: true, won: true }
+      console.log('🎯 setGameState en handleWin:', newState)
+      return newState
+    })
     
     // Mostrar modal primero
     setModalMessage(`¡Felicidades! ¡Adivinaste la palabra: "${gameData.wordToGuess}"!`)
@@ -537,7 +659,7 @@ export default function TwitchdleGame() {
     }
     
     // Generar esquema de emojis
-    const emojiGrid = generateEmojiGrid(gameData.board, gameData.wordToGuess.length)
+    const emojiGrid = generateEmojiGrid(gameData.board, gameData.wordToGuess.length, gameData.attempts)
     
     // Guardar estadísticas actualizadas
     localStorage.setItem('twitchdleStats', JSON.stringify(newStats))
@@ -678,99 +800,64 @@ export default function TwitchdleGame() {
       )}
 
       <div className="container">
-        <div 
-          ref={boardRef} 
-          id="board"
-          style={{ '--word-length': gameState.wordToGuess.length } as React.CSSProperties}
-        >
-          {gameState.board.map((row, rowIndex) => (
-            <div key={rowIndex} className="row">
-              {row.map((cell, colIndex) => {
-                // Si la celda tiene formato "letra:color", separar
-                const parts = cell.split(':')
-                const letter = parts[0]
-                const color = parts[1]
-                
-                return (
-                  <div 
-                    key={colIndex} 
-                    className={`cell ${color || ''}`}
-                  >
-                    {letter}
-                  </div>
-                )
-              })}
+        {!showStatsScreen ? (
+          <>
+            <div 
+              ref={boardRef} 
+              id="board"
+              style={{ '--word-length': gameState.wordToGuess.length } as React.CSSProperties}
+            >
+              {gameState.board.map((row, rowIndex) => (
+                <div key={rowIndex} className="row">
+                  {row.map((cell, colIndex) => {
+                    // Si la celda tiene formato "letra:color", separar
+                    const parts = cell.split(':')
+                    const letter = parts[0]
+                    const color = parts[1]
+                    
+                    return (
+                      <div 
+                        key={colIndex} 
+                        className={`cell ${color || ''}`}
+                      >
+                        {letter}
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        
-        <div ref={keyboardRef} id="keyboard">
-          <div className="keyboard-row">
-            {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(key => (
-              <button key={key} className="key" onClick={() => handleKeyPress(key)}>
-                {key}
-              </button>
-            ))}
-          </div>
-          <div className="keyboard-row">
-            {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].map(key => (
-              <button key={key} className="key" onClick={() => handleKeyPress(key)}>
-                {key}
-              </button>
-            ))}
-          </div>
-          <div className="keyboard-row">
-            <button className="key wide" onClick={() => handleKeyPress('ENTER')}>ENTER</button>
-            {['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(key => (
-              <button key={key} className="key" onClick={() => handleKeyPress(key)}>
-                {key}
-              </button>
-            ))}
-            <button className="key wide" onClick={() => handleKeyPress('BACKSPACE')}>⌫</button>
-          </div>
-        </div>
-        
-        {message && <div id="message">{message}</div>}
-      </div>
-
-      {showGameOverModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={() => {
-              console.log('❌ Modal close clicked')
-              setShowGameOverModal(false)
-              setShowStatsScreen(true)
-            }}>&times;</span>
-            <p>{modalMessage}</p>
-            <p>{modalCountdown}</p>
             
-            {/* Social buttons */}
-            <div className="social-buttons">
-              <a href="https://github.com/daantesiito" target="_blank" rel="noopener noreferrer" className="social-button github">
-                GitHub
-              </a>
-              <a href="https://ko-fi.com/dantesito" target="_blank" rel="noopener noreferrer" className="social-button cafecito">
-                Cafecito
-              </a>
-              <a href="https://instagram.com/dantesito.dev" target="_blank" rel="noopener noreferrer" className="social-button instagram">
-                Instagram
-              </a>
-              <a href="https://twitch.tv/dantesito" target="_blank" rel="noopener noreferrer" className="social-button twitch">
-                Twitch
-              </a>
-              <a href="https://discord.gg/dantesito" target="_blank" rel="noopener noreferrer" className="social-button discord">
-                Discord
-              </a>
+            <div ref={keyboardRef} id="keyboard">
+              <div className="keyboard-row">
+                {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(key => (
+                  <button key={key} className="key" onClick={() => handleKeyPress(key)}>
+                    {key}
+                  </button>
+                ))}
+              </div>
+              <div className="keyboard-row">
+                {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'].map(key => (
+                  <button key={key} className="key" onClick={() => handleKeyPress(key)}>
+                    {key}
+                  </button>
+                ))}
+              </div>
+              <div className="keyboard-row">
+                <button className="key wide" onClick={() => handleKeyPress('ENTER')}>ENTER</button>
+                {['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map(key => (
+                  <button key={key} className="key" onClick={() => handleKeyPress(key)}>
+                    {key}
+                  </button>
+                ))}
+                <button className="key wide" onClick={() => handleKeyPress('BACKSPACE')}>⌫</button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pantalla de estadísticas */}
-      {showStatsScreen && (
-        <div className="stats-screen">
+            
+            {message && <div id="message">{message}</div>}
+          </>
+        ) : (
           <div className="stats-content">
-            <h1>Twitchdle</h1>
             <h2>¡Ya jugaste!</h2>
             
             {gameStats.lastGameResult && (
@@ -792,20 +879,22 @@ export default function TwitchdleGame() {
                   <h3>Estadísticas</h3>
                   <div className="stats-grid">
                     <div className="stat-item">
-                      <div className="stat-label">Jugadas:</div>
-                      <div className="stat-value">{gameStats.gamesPlayed}</div>
+                      <span className="stat-label">Jugadas:</span>
+                      <span className="stat-value">{gameStats.gamesPlayed}</span>
                     </div>
                     <div className="stat-item">
-                      <div className="stat-label">Victorias:</div>
-                      <div className="stat-value">{gameStats.gamesPlayed > 0 ? ((gameStats.victories / gameStats.gamesPlayed) * 100).toFixed(2) : '0.00'}%</div>
+                      <span className="stat-label">Victorias:</span>
+                      <span className="stat-value">
+                        {gameStats.gamesPlayed > 0 ? ((gameStats.victories / gameStats.gamesPlayed) * 100).toFixed(2) : '0.00'}%
+                      </span>
                     </div>
                     <div className="stat-item">
-                      <div className="stat-label">Racha Actual:</div>
-                      <div className="stat-value">{gameStats.currentStreak}</div>
+                      <span className="stat-label">Racha Actual:</span>
+                      <span className="stat-value">{gameStats.currentStreak}</span>
                     </div>
                     <div className="stat-item">
-                      <div className="stat-label">Mejor Racha:</div>
-                      <div className="stat-value">{gameStats.maxStreak}</div>
+                      <span className="stat-label">Mejor Racha:</span>
+                      <span className="stat-value">{gameStats.maxStreak}</span>
                     </div>
                   </div>
                   
@@ -818,12 +907,12 @@ export default function TwitchdleGame() {
                           <div 
                             className="guess-fill" 
                             style={{ 
-                              width: gameStats.gamesPlayed > 0 ? `${(count / gameStats.gamesPlayed) * 100}%` : '0%' 
+                              width: gameStats.victories > 0 ? `${(count / gameStats.victories) * 100}%` : '0%' 
                             }}
                           ></div>
                         </div>
                         <span className="guess-count">
-                          {count} ({gameStats.gamesPlayed > 0 ? ((count / gameStats.gamesPlayed) * 100).toFixed(2) : '0.00'}%)
+                          {count} ({gameStats.victories > 0 ? ((count / gameStats.victories) * 100).toFixed(2) : '0.00'}%)
                         </span>
                       </div>
                     ))}
@@ -832,27 +921,61 @@ export default function TwitchdleGame() {
                 
                 {/* Social buttons */}
                 <div className="social-buttons">
-                  <a href="https://github.com/daantesiito" target="_blank" rel="noopener noreferrer" className="social-button github">
-                    GitHub
+                  <a href="https://cafecito.app/dantesiito" target="_blank" className="social-button cafecito">
+                    <i className="fas fa-coffee"></i>
                   </a>
-                  <a href="https://ko-fi.com/dantesito" target="_blank" rel="noopener noreferrer" className="social-button cafecito">
-                    Cafecito
+                  <a href="https://github.com/daantesiito" target="_blank" className="social-button github">
+                    <i className="fab fa-github"></i>
                   </a>
-                  <a href="https://instagram.com/dantesito.dev" target="_blank" rel="noopener noreferrer" className="social-button instagram">
-                    Instagram
+                  <a href="https://www.instagram.com/dante_puddu/" target="_blank" className="social-button instagram">
+                    <i className="fab fa-instagram"></i>
                   </a>
-                  <a href="https://twitch.tv/dantesito" target="_blank" rel="noopener noreferrer" className="social-button twitch">
-                    Twitch
+                  <a href="https://www.twitch.tv/daantesiito" target="_blank" className="social-button twitch">
+                    <i className="fab fa-twitch"></i>
                   </a>
-                  <a href="https://discord.gg/dantesito" target="_blank" rel="noopener noreferrer" className="social-button discord">
-                    Discord
+                  <a href="https://discordapp.com/users/326820001879162880" target="_blank" className="social-button discord">
+                    <i className="fab fa-discord"></i>
                   </a>
                 </div>
               </>
             )}
           </div>
+        )}
+      </div>
+
+      {showGameOverModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => {
+              console.log('❌ Modal close clicked')
+              setShowGameOverModal(false)
+              setShowStatsScreen(true)
+            }}>&times;</span>
+            <p>{modalMessage}</p>
+            <p>{modalCountdown}</p>
+            
+            {/* Social buttons */}
+            <div className="social-buttons">
+              <a href="https://github.com/daantesiito" target="_blank" rel="noopener noreferrer" className="social-button github">
+                <i className="fab fa-github"></i>
+              </a>
+              <a href="https://cafecito.app/dantesiito" target="_blank" rel="noopener noreferrer" className="social-button cafecito">
+                <i className="fas fa-coffee"></i>
+              </a>
+              <a href="https://www.instagram.com/dante_puddu/" target="_blank" rel="noopener noreferrer" className="social-button instagram">
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a href="https://www.twitch.tv/daantesiito" target="_blank" rel="noopener noreferrer" className="social-button twitch">
+                <i className="fab fa-twitch"></i>
+              </a>
+              <a href="https://discordapp.com/users/326820001879162880" target="_blank" rel="noopener noreferrer" className="social-button discord">
+                <i className="fab fa-discord"></i>
+              </a>
+            </div>
+          </div>
         </div>
       )}
+
       </div>
     </>
   )

@@ -47,7 +47,7 @@ export default async function TwitchdlePage() {
             Adivina la palabra del día relacionada con Twitch y el streaming
           </p>
           <div className="flex justify-center">
-            <AuthButton />
+            <AuthButton callbackUrl="/games/twitchdle" />
           </div>
         </div>
       </div>
