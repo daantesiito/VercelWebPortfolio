@@ -9,6 +9,12 @@
       "maxDuration": 30
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/generate-daily-word",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "env": {
     "NODE_ENV": "production"
   }

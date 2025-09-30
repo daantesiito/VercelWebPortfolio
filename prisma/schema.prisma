@@ -1,32 +1,26 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")    // pool (pgBouncer) para runtime
-  directUrl = env("DIRECT_URL")      // directa para migraciones
+  url       = env("DATABASE_URL")
 }
 
-// NextAuth.js models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -40,23 +34,23 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  // Twitch-specific fields
-  twitchId      String?   @unique
-  twitchLogin   String?   @unique
-  displayName   String?
-  avatarUrl     String?
-  followers     Int?      @default(0)
-  isStreamer    Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  scores        Score[]
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  twitchId       String?         @unique
+  twitchLogin    String?         @unique
+  displayName    String?
+  avatarUrl      String?
+  followers      Int?            @default(0)
+  isStreamer     Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  accounts       Account[]
+  scores         Score[]
+  sessions       Session[]
+  twitchdleGames TwitchdleGame[]
 }
 
 model VerificationToken {
@@ -67,18 +61,47 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Custom models
-
 model Score {
   id        String   @id @default(cuid())
   userId    String
-  gameSlug  String   // "2048" | "twitchdle" | "suika"
+  gameSlug  String
   value     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, gameSlug])   // un best score por juego
+  @@unique([userId, gameSlug])
   @@index([gameSlug, value])
+}
+
+model TwitchdleGame {
+  id           String   @id @default(cuid())
+  userId       String
+  date         String
+  wordToGuess  String
+  board        String
+  currentRow   Int      @default(0)
+  currentCol   Int      @default(0)
+  gameFinished Boolean  @default(false)
+  won          Boolean?
+  attempts     Int      @default(0)
+  streak       Int      @default(0)
+  maxStreak    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+model Word {
+  id        String   @id @default(cuid())
+  date      String   @unique // "2025-01-27" formato YYYY-MM-DD
+  word      String   // Palabra del día
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("DailyWord")
+  @@index([date])
 }

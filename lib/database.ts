@@ -1,4 +1,8 @@
 import { Pool } from 'pg'
+import { PrismaClient } from '@prisma/client'
+
+// Instancia de Prisma
+export const prisma = new PrismaClient()
 
 // Configuración de connection pooling para Vercel
 const pool = new Pool({
