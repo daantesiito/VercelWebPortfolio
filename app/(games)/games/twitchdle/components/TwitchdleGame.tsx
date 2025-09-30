@@ -6,7 +6,7 @@ import { useTwitchdleGame } from '../hooks/useTwitchdleGame'
 
 export default function TwitchdleGame() {
   const { data: session } = useSession()
-  const { gameState, loading, error, saveGame, updateLocalState, createNewGame, validateWord, setGameState, onType, onBackspace, onEnter } = useTwitchdleGame()
+  const { gameState, loading, error, saveGame, updateLocalState, validateWord, setGameState, onType, onBackspace, onEnter } = useTwitchdleGame()
   
   // Función para obtener la palabra del día desde la base de datos
   const getDailyWord = async () => {
@@ -50,7 +50,7 @@ export default function TwitchdleGame() {
     setTimeout(() => setMessage(''), 2000)
   }, [])
 
-  const handleKeyPress = useCallback(async (key: string) => {
+  const handleKeyPress = useCallback((key: string) => {
     if (!gameState || gameState.gameFinished) return
 
     if (key === 'BACKSPACE') {
@@ -61,27 +61,13 @@ export default function TwitchdleGame() {
         showMessage('Palabra incompleta')
         return
       }
-
-      // Si no hay ID del juego, crear uno nuevo antes de validar
-      if (!gameState.id) {
-        const wordLength = gameState.wordLength || 4
-        console.log('🎮 Creating new game before validation with wordLength:', wordLength)
-        
-        // Crear el juego en paralelo con la validación para reducir delay
-        const gameCreationPromise = createNewGame(wordLength)
-        
-        // Mientras se crea el juego, proceder con la validación
-        await onEnter(showMessage)
-        
-        // Esperar a que termine la creación del juego
-        await gameCreationPromise
-      } else {
-        await onEnter(showMessage)
-      }
+      
+      // Proceder con la validación (instantáneo)
+      onEnter(showMessage)
     } else if (gameState.draftRow.length < gameState.wordLength) {
       onType(key)
     }
-  }, [gameState, createNewGame, onType, onBackspace, onEnter, showMessage])
+  }, [gameState, onType, onBackspace, onEnter, showMessage])
 
 
   // Event listener para teclado físico
@@ -163,39 +149,41 @@ export default function TwitchdleGame() {
           guessDistribution[gameState.attempts - 1] = 1
         }
         
-        // Si el juego terminó, obtener la palabra del día primero
+        // Si el juego terminó, obtener la palabra del día en paralelo
         if (gameState.gameFinished) {
-          try {
-            const dailyWord = await getDailyWord()
-            setGameStats({
-              gamesPlayed: 1, // Por ahora solo contamos el juego actual
-              victories: gameState.won ? 1 : 0,
-              currentStreak: gameState.streak,
-              maxStreak: gameState.maxStreak,
-              guessDistribution,
+          // Mostrar stats inmediatamente con placeholder
+          setGameStats({
+            gamesPlayed: 1,
+            victories: gameState.won ? 1 : 0,
+            currentStreak: gameState.streak,
+            maxStreak: gameState.maxStreak,
+            guessDistribution,
+            lastGameResult: {
+              won: gameState.won,
+              wordToGuess: 'Cargando...',
+              attempts: gameState.attempts
+            },
+            emojiGrid: generateEmojiGrid(gameState.committedBoard, gameState.attempts)
+          })
+          
+          // Obtener palabra del día en paralelo y actualizar
+          getDailyWord().then(dailyWord => {
+            setGameStats(prev => ({
+              ...prev,
               lastGameResult: {
-                won: gameState.won,
-                wordToGuess: dailyWord,
-                attempts: gameState.attempts
-              },
-              emojiGrid: generateEmojiGrid(gameState.committedBoard, gameState.attempts)
-            })
-          } catch (error) {
-            // Si falla, mostrar error
-            setGameStats({
-              gamesPlayed: 1,
-              victories: gameState.won ? 1 : 0,
-              currentStreak: gameState.streak,
-              maxStreak: gameState.maxStreak,
-              guessDistribution,
+                ...prev.lastGameResult,
+                wordToGuess: dailyWord
+              }
+            }))
+          }).catch(error => {
+            setGameStats(prev => ({
+              ...prev,
               lastGameResult: {
-                won: gameState.won,
-                wordToGuess: 'Error al cargar',
-                attempts: gameState.attempts
-              },
-              emojiGrid: generateEmojiGrid(gameState.committedBoard, gameState.attempts)
-            })
-          }
+                ...prev.lastGameResult,
+                wordToGuess: 'Error al cargar'
+              }
+            }))
+          })
         } else {
           // Si el juego no terminó, solo actualizar estadísticas básicas
           setGameStats(prev => ({

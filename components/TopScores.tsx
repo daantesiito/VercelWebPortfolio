@@ -24,9 +24,9 @@ export default function TopScores({ scores, game, limit = 10, title = "Top" }: T
     setIsClient(true)
   }, [])
 
-  const formatNumber = (num: number) => {
-    if (!isClient) return num.toString() // Durante SSR, usar formato simple
-    return num.toLocaleString() // En el cliente, usar formato localizado
+  const formatNumber = (num: number | undefined) => {
+    if (!isClient) return (num ?? 0).toString() // Durante SSR, usar formato simple
+    return (num ?? 0).toLocaleString() // En el cliente, usar formato localizado
   }
 
   if (scores.length === 0) {

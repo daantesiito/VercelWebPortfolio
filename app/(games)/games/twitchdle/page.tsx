@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getTopStreakScores, type TopScore } from '@/lib/scores';
-import TwitchdleWithLeaderboard from './components/TwitchdleWithLeaderboard';
 import AuthButton from '@/components/AuthButton';
+import ClientProviders from './ClientProviders';
 import './styles.css';
 
 // Forzar Node.js runtime para Prisma
@@ -56,7 +56,8 @@ export default async function TwitchdlePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <TwitchdleWithLeaderboard initialStreakScores={streakScores} />
+      <ClientProviders streakScores={streakScores} />
     </div>
   );
 }
+

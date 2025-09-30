@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { cleanupOldLocalStorage } from '../utils/cleanupLocalStorage'
+import { bumpMyStreakOptimistic } from './useStats'
 
 // Tipos base para el estado del juego
 export type LetterStatus = 'absent' | 'present' | 'correct'
@@ -25,6 +28,7 @@ export interface GameState extends GameSnapshot {
   draftRow: string[]        // lo que estoy escribiendo en la fila actual
   currentCol: number
   wordLength: number
+  userId: string           // agregado para formar la key local estable
 }
 
 // Respuesta de la API (solo estado comprometido)
@@ -44,9 +48,60 @@ export interface GameResponse {
 // Helpers para localStorage
 const lsKey = (userId: string, date: string) => `twitchdle:${userId}:${date}`
 
+// Debounce para persistencia local
+let saveTimer: number | undefined
+
+function saveLocalDebounced(state: GameState) {
+  if (saveTimer) window.clearTimeout(saveTimer)
+  saveTimer = window.setTimeout(() => {
+    try {
+      localStorage.setItem(lsKey(state.userId, state.date), JSON.stringify(state))
+    } catch {}
+  }, 150)
+}
+
+function saveLocalNow(state: GameState) {
+  try {
+    localStorage.setItem(lsKey(state.userId, state.date), JSON.stringify(state))
+  } catch {}
+}
+
+// Función para evaluar localmente (algoritmo idéntico a Wordle)
+function evaluateLocally(guessArr: string[], solution: string): Cell[] {
+  const n = guessArr.length
+  const res: Cell[] = Array.from({ length: n }, (_, i) => ({ letter: guessArr[i].toUpperCase() }))
+  const sol = solution.toUpperCase().split('')
+
+  // Conteo de letras disponibles para "present"
+  const counts: Record<string, number> = {}
+  for (const ch of sol) counts[ch] = (counts[ch] || 0) + 1
+
+  // Primera pasada: correct
+  for (let i = 0; i < n; i++) {
+    if (res[i].letter === sol[i]) {
+      res[i].status = 'correct'
+      counts[res[i].letter]--
+    }
+  }
+  
+  // Segunda pasada: present/absent
+  for (let i = 0; i < n; i++) {
+    if (res[i].status === 'correct') continue
+    const ch = res[i].letter
+    if ((counts[ch] || 0) > 0) {
+      res[i].status = 'present'
+      counts[ch]--
+    } else {
+      res[i].status = 'absent'
+    }
+  }
+  
+  return res
+}
+
 function saveLocal(state: GameState) {
-  if (!state.id && !state.date) return
-  const key = lsKey(state.id || 'anon', state.date)
+  if (!state.userId || !state.date) return
+  const key = lsKey(state.userId, state.date)
   localStorage.setItem(key, JSON.stringify(state))
 }
 
@@ -54,6 +109,13 @@ function loadLocal(userId: string, date: string): GameState | null {
   const key = lsKey(userId, date)
   const raw = localStorage.getItem(key)
   return raw ? JSON.parse(raw) : null
+}
+
+// Función para cargar la palabra del día una sola vez
+async function ensureDailyWord(date: string): Promise<string> {
+  const res = await fetch(`/api/twitchdle/daily-word?date=${date}`, { cache: 'force-cache' })
+  const { word } = await res.json()
+  return (word || '').toUpperCase()
 }
 
 // Función para convertir board plano a committedBoard
@@ -80,7 +142,7 @@ function convertCommittedToBoard(committedBoard: Cell[][]): string[][] {
 }
 
 // Función para aplicar estado del servidor con guard de versión
-function applyServerToLocal(server: GameResponse, setState: (updater: (s: GameState | null) => GameState | null) => void, wordLength: number) {
+function applyServerToLocal(server: GameResponse, setState: (updater: (s: GameState | null) => GameState | null) => void, wordLength: number, userId: string) {
   setState(local => {
     if (!local) {
       // Primera carga: convertir respuesta del servidor
@@ -101,7 +163,8 @@ function applyServerToLocal(server: GameResponse, setState: (updater: (s: GameSt
         updatedAt: new Date().toISOString(),
         draftRow: [],
         currentCol: 0,
-        wordLength
+        wordLength,
+        userId
       }
       saveLocal(newState)
       return newState
@@ -148,6 +211,79 @@ export function useTwitchdleGame() {
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const qc = useQueryClient()
+  const solutionRef = useRef<string | null>(null)
+
+  // Mutación optimista para enviar intentos
+  const sendAttempt = useMutation({
+    mutationFn: async (payload: { gameId: string; date: string; rowIndex: number; guess: string; clientVersion: number }) => {
+      const res = await fetch('/api/twitchdle/game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: payload.date,
+          board: convertCommittedToBoard(gameState?.committedBoard || []),
+          currentRow: payload.rowIndex + 1,
+          currentCol: 0,
+          gameFinished: false,
+          won: null,
+          attempts: payload.rowIndex + 1,
+          streak: gameState?.streak || 0,
+          maxStreak: gameState?.maxStreak || 0,
+          guess: payload.guess
+        })
+      })
+      if (!res.ok) throw new Error('attempt failed')
+      return res.json() as Promise<GameResponse>
+    },
+    onSuccess: (serverResponse) => {
+      // Actualizar cache con respuesta del servidor
+      qc.setQueryData(['game', serverResponse.id, serverResponse.date], (local: GameState | undefined) => {
+        if (!local) {
+          const committedBoard = convertBoardToCommitted(serverResponse.board, serverResponse.board[0]?.length || 4)
+          return {
+            id: serverResponse.id,
+            date: serverResponse.date,
+            committedBoard,
+            currentRow: serverResponse.currentRow,
+            attempts: serverResponse.attempts,
+            gameFinished: serverResponse.gameFinished,
+            won: serverResponse.won,
+            streak: serverResponse.streak,
+            maxStreak: serverResponse.maxStreak,
+            version: 1,
+            updatedAt: new Date().toISOString(),
+            draftRow: [],
+            currentCol: 0,
+            wordLength: serverResponse.board[0]?.length || 4,
+            userId: session?.user?.id || ''
+          } as GameState
+        }
+        
+        // Solo actualizar si el servidor tiene datos más nuevos
+        const serverIsNewer = new Date(serverResponse.date).getTime() >= new Date(local.updatedAt).getTime()
+        if (!serverIsNewer) return local
+        
+        const committedBoard = convertBoardToCommitted(serverResponse.board, local.wordLength)
+        return {
+          ...local,
+          id: serverResponse.id,
+          date: serverResponse.date,
+          committedBoard,
+          currentRow: serverResponse.currentRow,
+          attempts: serverResponse.attempts,
+          gameFinished: serverResponse.gameFinished,
+          won: serverResponse.won,
+          streak: serverResponse.streak,
+          maxStreak: serverResponse.maxStreak,
+          version: (local.version ?? 0) + 1,
+          updatedAt: new Date().toISOString(),
+          draftRow: local.draftRow ?? [],
+          currentCol: local.draftRow?.length ?? 0
+        }
+      })
+    }
+  })
 
   // Cargar el estado del juego
   const loadGame = useCallback(async (date?: string) => {
@@ -184,44 +320,17 @@ export function useTwitchdleGame() {
       const game: GameResponse | null = await response.json()
       
       if (!game) {
-        // No hay juego guardado, necesitamos obtener la palabra del día para saber el largo
-        console.log('🆕 No hay juego guardado, obteniendo palabra del día...')
-        try {
-          const dailyWordResponse = await fetch(`/api/twitchdle/daily-word?date=${currentDate}`)
-          if (dailyWordResponse.ok) {
-            const dailyWordData = await dailyWordResponse.json()
-            const wordLength = dailyWordData.word.length
-            
-            const initialState: GameState = {
-              id: '',
-              date: currentDate,
-              committedBoard: Array(6).fill(null).map(() => Array(wordLength).fill({ letter: '', status: undefined })),
-              currentRow: 0,
-              attempts: 0,
-              gameFinished: false,
-              won: null,
-              streak: 0,
-              maxStreak: 0,
-              version: 1,
-              updatedAt: new Date().toISOString(),
-              draftRow: [],
-              currentCol: 0,
-              wordLength: wordLength
-            }
-            setGameState(initialState)
-            saveLocal(initialState)
-            return
-          }
-        } catch (error) {
-          console.error('Error obteniendo palabra del día:', error)
-        }
+        // No hay juego guardado, crear uno nuevo instantáneamente
+        console.log('🆕 Creando nuevo juego instantáneamente...')
         
-        // Fallback a 4 letras si no se puede obtener la palabra
-        console.log('⚠️ Usando fallback de 4 letras')
+        // Cargar la palabra del día para obtener el largo
+        const solution = await ensureDailyWord(currentDate)
+        const wordLength = solution.length
+        
         const initialState: GameState = {
           id: '',
           date: currentDate,
-          committedBoard: Array(6).fill(null).map(() => Array(4).fill({ letter: '', status: undefined })),
+          committedBoard: Array(6).fill(null).map(() => Array(wordLength).fill({ letter: '', status: undefined })),
           currentRow: 0,
           attempts: 0,
           gameFinished: false,
@@ -232,15 +341,24 @@ export function useTwitchdleGame() {
           updatedAt: new Date().toISOString(),
           draftRow: [],
           currentCol: 0,
-          wordLength: 4
+          wordLength: wordLength,
+          userId: session.user.id
         }
+        
+        // Establecer la solución en el ref
+        solutionRef.current = solution
+        
         setGameState(initialState)
         saveLocal(initialState)
         return
       }
       
+      // Cargar la solución para el juego existente
+      const solution = await ensureDailyWord(currentDate)
+      solutionRef.current = solution
+      
       // Aplicar estado del servidor con guard de versión
-      applyServerToLocal(game, setGameState, game.board[0]?.length || 4)
+      applyServerToLocal(game, setGameState, game.board[0]?.length || 4, session.user.id)
       
       console.log('✅ Game loaded from API:', game)
     } catch (err) {
@@ -252,54 +370,6 @@ export function useTwitchdleGame() {
   }, [session?.user?.id])
 
   // Crear un nuevo juego
-  const createNewGame = useCallback(async (wordLength: number) => {
-    if (!session?.user?.id) {
-      console.log('❌ Cannot create game - no session')
-      return
-    }
-
-    try {
-      const currentDate = new Date().toISOString().split('T')[0]
-      
-      const response = await fetch('/api/twitchdle/game', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: currentDate,
-          board: Array(6).fill(null).map(() => Array(wordLength).fill('')),
-          currentRow: 0,
-          currentCol: 0,
-          gameFinished: false,
-          won: null,
-          attempts: 0,
-          streak: 0,
-          maxStreak: 0,
-          isNewGame: true // Flag para indicar que es un juego nuevo
-        })
-      })
-      
-      if (!response.ok) {
-        throw new Error('Error al crear el juego')
-      }
-      
-      const newGame: GameResponse = await response.json()
-      
-      setGameState(prev => prev ? {
-        ...prev,
-        id: newGame.id,
-        wordLength: wordLength
-      } : null)
-      
-      console.log('✅ New game created:', newGame)
-      return newGame
-    } catch (err) {
-      console.error('❌ Error creating game:', err)
-      setError(err instanceof Error ? err.message : 'Error al crear el juego')
-      throw err
-    }
-  }, [session?.user?.id])
 
   // Función para convertir GameState a GameSnapshot (sin draft)
   const stripDraft = useCallback((state: GameState): GameSnapshot => {
@@ -383,39 +453,26 @@ export function useTwitchdleGame() {
     })
   }, [])
 
-  // Validar una palabra
-  const validateWord = useCallback(async (word: string): Promise<{ valid: boolean; result?: string[]; isCorrect?: boolean; error?: string }> => {
-    if (!session?.user?.id) {
-      console.log('❌ Cannot validate word - no session')
-      return { valid: false, error: 'No autorizado' }
+  // Verificar si la palabra es la palabra del día (solución)
+  const validateWord = useCallback((word: string): { valid: boolean; error?: string } => {
+    // Verificar si tenemos la solución cargada
+    if (!solutionRef.current) {
+      return { valid: false, error: 'Solución no disponible' }
     }
-
-    try {
-      const currentDate = new Date().toISOString().split('T')[0]
-      
-      const response = await fetch('/api/twitchdle/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          word,
-          date: currentDate
-        })
-      })
-      
-      const result = await response.json()
-      
-      if (!response.ok) {
-        return { valid: false, error: result.error || 'Error de validación' }
-      }
-      
-      return result
-    } catch (err) {
-      console.error('❌ Error validating word:', err)
-      return { valid: false, error: 'Error de validación' }
+    
+    // Verificar si la palabra ingresada es la solución
+    if (word.toUpperCase() === solutionRef.current.toUpperCase()) {
+      return { valid: true }
     }
-  }, [session?.user?.id])
+    
+    // Si no es la solución, verificar si es una palabra válida (opcional)
+    // Por ahora, aceptamos cualquier palabra de la longitud correcta
+    if (word.length !== solutionRef.current.length) {
+      return { valid: false, error: `La palabra debe tener ${solutionRef.current.length} letras` }
+    }
+    
+    return { valid: true }
+  }, [])
 
   // Funciones para manejar tipeo (solo local)
   const onType = useCallback((letter: string) => {
@@ -424,7 +481,7 @@ export function useTwitchdleGame() {
       if (s.draftRow.length >= s.wordLength) return s
       const draftRow = [...s.draftRow, letter.toUpperCase()]
       const next = { ...s, draftRow, currentCol: draftRow.length }
-      saveLocal(next)
+      saveLocalDebounced(next)
       return next
     })
   }, [])
@@ -434,20 +491,29 @@ export function useTwitchdleGame() {
       if (!s || !s.draftRow.length) return s
       const draftRow = s.draftRow.slice(0, -1)
       const next = { ...s, draftRow, currentCol: draftRow.length }
-      saveLocal(next)
+      saveLocalDebounced(next)
       return next
     })
   }, [])
 
-  const onEnter = useCallback(async (onError?: (error: string) => void) => {
+  const onEnter = useCallback((onError?: (error: string) => void) => {
     if (!gameState || gameState.draftRow.length !== gameState.wordLength || gameState.gameFinished) {
       return
     }
 
-    // Validar la palabra
+    // La solución ya debería estar cargada desde loadGame
+    if (!solutionRef.current) {
+      console.error('❌ No solution available')
+      if (onError) {
+        onError('Error: solución no disponible')
+      }
+      return
+    }
+
     const guess = gameState.draftRow.join('')
-    const validation = await validateWord(guess)
     
+    // Validar la palabra localmente (instantáneo)
+    const validation = validateWord(guess)
     if (!validation.valid) {
       console.log('❌ Invalid word:', validation.error)
       if (onError) {
@@ -456,27 +522,23 @@ export function useTwitchdleGame() {
       return
     }
 
-    // Evaluar la palabra localmente
-    const evaluation: Cell[] = gameState.draftRow.map((letter, index) => ({
-      letter,
-      status: validation.result?.[index] as LetterStatus
-    }))
+    // Evaluar localmente con el algoritmo de Wordle
+    const evaluation = evaluateLocally(gameState.draftRow, solutionRef.current)
+    const isCorrect = evaluation.every(cell => cell.status === 'correct')
 
-    // Commit de la fila
     setGameState(s => {
       if (!s) return s
+
       const committedBoard = [...s.committedBoard]
       committedBoard[s.currentRow] = evaluation
-      const attempts = s.attempts + 1
-      const isCorrect = validation.isCorrect
-      
+
       const next: GameState = {
         ...s,
         committedBoard,
         draftRow: [],
         currentRow: s.currentRow + 1,
         currentCol: 0,
-        attempts,
+        attempts: s.attempts + 1,
         version: (s.version ?? 0) + 1,
         updatedAt: new Date().toISOString(),
         gameFinished: isCorrect || s.currentRow === 5,
@@ -484,54 +546,44 @@ export function useTwitchdleGame() {
         streak: isCorrect ? s.streak + 1 : (s.currentRow === 5 ? 0 : s.streak),
         maxStreak: isCorrect ? Math.max(s.streak + 1, s.maxStreak) : s.maxStreak
       }
-      saveLocal(next)
+
+      // 1) UI instantánea + persistencia local
+      saveLocalNow(next)
+
+      // 2) Enviar al servidor SIN esperar (idempotente por rowIndex)
+      sendAttempt.mutate({
+        gameId: s.id || '',
+        date: s.date,
+        rowIndex: s.currentRow,
+        guess: guess,
+        clientVersion: next.version
+      })
+
       return next
     })
-
-    // Guardar en API de forma asíncrona
-    const currentState = gameState
-    const newAttempts = currentState.attempts + 1
-    const isCorrect = validation.isCorrect
-    
-    if (isCorrect) {
-      const newStreak = currentState.streak + 1
-      const newMaxStreak = Math.max(newStreak, currentState.maxStreak)
-      
-      saveGame({
-        committedBoard: [...currentState.committedBoard, evaluation],
-        currentRow: currentState.currentRow + 1,
-        attempts: newAttempts,
-        gameFinished: true,
-        won: true,
-        streak: newStreak,
-        maxStreak: newMaxStreak
-      }).catch(console.error)
-    } else if (currentState.currentRow === 5) {
-      saveGame({
-        committedBoard: [...currentState.committedBoard, evaluation],
-        currentRow: currentState.currentRow + 1,
-        attempts: newAttempts,
-        gameFinished: true,
-        won: false,
-        streak: 0
-      }).catch(console.error)
-    } else {
-      saveGame({
-        committedBoard: [...currentState.committedBoard, evaluation],
-        currentRow: currentState.currentRow + 1,
-        attempts: newAttempts
-      }).catch(console.error)
-    }
-  }, [gameState, validateWord, saveGame])
+  }, [gameState, validateWord, sendAttempt])
 
   // Cargar el juego al montar el componente
   useEffect(() => {
+    // Limpiar localStorage viejo una sola vez
+    cleanupOldLocalStorage()
+    
     if (session?.user?.id) {
       loadGame()
     } else {
       setLoading(false)
     }
   }, [session?.user?.id, loadGame])
+
+  // Manejar bump optimista del leaderboard cuando el usuario gana
+  useEffect(() => {
+    if (gameState?.gameFinished && gameState?.won && session?.user?.id) {
+      // Usar setTimeout para evitar el error de React durante el render
+      setTimeout(() => {
+        bumpMyStreakOptimistic(session.user.id, gameState.date)
+      }, 0)
+    }
+  }, [gameState?.gameFinished, gameState?.won, gameState?.date, session?.user?.id])
 
   return {
     gameState,
@@ -540,7 +592,6 @@ export function useTwitchdleGame() {
     loadGame,
     saveGame,
     updateLocalState,
-    createNewGame,
     validateWord,
     setGameState,
     onType,
