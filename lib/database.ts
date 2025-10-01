@@ -29,6 +29,7 @@ export async function getScores(gameSlug: string, limit: number = 10, streamersO
   let queryText = `
     SELECT 
       s.value,
+      s."userId",
       COALESCE(u."displayName", u.name) as displayName,
       u."avatarUrl" as avatarUrl,
       u."twitchLogin"
@@ -125,6 +126,7 @@ export async function getStreakScores(gameSlug: string, limit: number = 10) {
   const queryText = `
     SELECT 
       s.value,
+      s."userId",
       COALESCE(u."displayName", u.name) as displayName,
       u."avatarUrl" as avatarUrl,
       u."twitchLogin"

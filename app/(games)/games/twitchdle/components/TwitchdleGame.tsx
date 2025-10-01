@@ -8,19 +8,13 @@ export default function TwitchdleGame() {
   const { data: session } = useSession()
   const { gameState, loading, error, saveGame, updateLocalState, validateWord, setGameState, onType, onBackspace, onEnter } = useTwitchdleGame()
   
-  // Función para obtener la palabra del día desde la base de datos
-  const getDailyWord = async () => {
-    try {
-      const response = await fetch(`/api/twitchdle/daily-word?date=${new Date().toISOString().split('T')[0]}`)
-      if (response.ok) {
-        const data = await response.json()
-        return data.word
-      }
-      throw new Error('No se pudo obtener la palabra del día')
-    } catch (error) {
-      console.error('Error obteniendo palabra del día:', error)
-      throw error
+  // Función para construir la distribución de intentos
+  const buildDistribution = (gameState: any) => {
+    const distribution = [0, 0, 0, 0, 0, 0]
+    if (gameState.gameFinished && gameState.won) {
+      distribution[gameState.attempts - 1] = 1
     }
+    return distribution
   }
   
   const [showInstructions, setShowInstructions] = useState(false)
@@ -142,16 +136,12 @@ export default function TwitchdleGame() {
   // Actualizar gameStats cuando se carga el juego
   useEffect(() => {
     if (gameState) {
-      const updateStats = async () => {
+      const updateStats = () => {
         // Crear distribución de intentos basada en el juego actual
-        const guessDistribution = [0, 0, 0, 0, 0, 0]
-        if (gameState.gameFinished && gameState.won) {
-          guessDistribution[gameState.attempts - 1] = 1
-        }
+        const guessDistribution = buildDistribution(gameState)
         
-        // Si el juego terminó, obtener la palabra del día en paralelo
+        // Si el juego terminó, mostrar stats inmediatamente con wordOfDay del estado
         if (gameState.gameFinished) {
-          // Mostrar stats inmediatamente con placeholder
           setGameStats({
             gamesPlayed: 1,
             victories: gameState.won ? 1 : 0,
@@ -160,29 +150,10 @@ export default function TwitchdleGame() {
             guessDistribution,
             lastGameResult: {
               won: gameState.won,
-              wordToGuess: 'Cargando...',
+              wordToGuess: gameState.wordOfDay || 'Palabra no disponible',
               attempts: gameState.attempts
             },
             emojiGrid: generateEmojiGrid(gameState.committedBoard, gameState.attempts)
-          })
-          
-          // Obtener palabra del día en paralelo y actualizar
-          getDailyWord().then(dailyWord => {
-            setGameStats(prev => ({
-              ...prev,
-              lastGameResult: {
-                ...prev.lastGameResult,
-                wordToGuess: dailyWord
-              }
-            }))
-          }).catch(error => {
-            setGameStats(prev => ({
-              ...prev,
-              lastGameResult: {
-                ...prev.lastGameResult,
-                wordToGuess: 'Error al cargar'
-              }
-            }))
           })
         } else {
           // Si el juego no terminó, solo actualizar estadísticas básicas

@@ -8,7 +8,7 @@ import UserProfile from './UserProfile'
 import { useUserCreation } from '../hooks/useUserCreation'
 import type { TopScore } from '@/components/TopScores'
 import { useQueryClient } from '@tanstack/react-query'
-import { useLeaderboard } from '../hooks/useStats'
+import { useLeaderboardLive } from '../hooks/useStats'
 
 interface TwitchdleWithLeaderboardProps {
   initialStreakScores: TopScore[]
@@ -26,7 +26,7 @@ export default function TwitchdleWithLeaderboard({ initialStreakScores }: Twitch
     qc.setQueryData(['leaderboard', 'streak', dateKey], initialStreakScores)
   }, [qc, dateKey, initialStreakScores])
 
-  const { data: streakScores = initialStreakScores } = useLeaderboard(dateKey)
+  const { data: streakScores = initialStreakScores } = useLeaderboardLive(dateKey)
   const typedStreakScores = (streakScores as TopScore[]) || initialStreakScores
 
   useEffect(() => {

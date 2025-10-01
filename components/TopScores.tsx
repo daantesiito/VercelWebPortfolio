@@ -8,6 +8,7 @@ export interface TopScore {
   avatarUrl: string | null
   twitchLogin: string
   value: number
+  userId?: string
 }
 
 interface TopScoresProps {
@@ -51,7 +52,7 @@ export default function TopScores({ scores, game, limit = 10, title = "Top" }: T
           
           return (
             <div
-              key={`${score.twitchLogin}-${score.value}`}
+              key={score.userId || `${score.twitchLogin}-${score.value}-${index}`}
               className="leaderboard-item flex items-center justify-between"
             >
               <div className="flex items-center gap-2">

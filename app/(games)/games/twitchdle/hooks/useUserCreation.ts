@@ -32,7 +32,7 @@ export function useUserCreation() {
           body: JSON.stringify({
             twitchId: user.twitchId,
             twitchLogin: user.twitchLogin,
-            displayName: user.displayName || user.name,
+            displayName: user.displayName || user.name || user.twitchLogin,
             avatarUrl: user.image,
           }),
         })

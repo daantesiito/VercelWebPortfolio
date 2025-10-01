@@ -106,16 +106,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Error al guardar el juego' }, { status: 500 })
     }
     
-    // Si el juego terminó y el usuario ganó, guardar en la tabla de scores
-    if (gameFinished && won && streak > 0) {
+    // Si el juego terminó, guardar/actualizar el score en la tabla de scores
+    if (gameFinished) {
       try {
         const { upsertBestScore } = await import('@/lib/scores')
+        const scoreToSave = won ? streak : 0 // Si gana, guardar la racha; si pierde, guardar 0
         await upsertBestScore(
           session.user.id,
           'twitchdle',
-          streak
+          scoreToSave
         )
-        console.log('✅ Score saved to leaderboard:', { userId: session.user.id, score: streak })
+        console.log('✅ Score saved to leaderboard:', { 
+          userId: session.user.id, 
+          score: scoreToSave, 
+          won: won,
+          streak: streak 
+        })
       } catch (error) {
         console.error('❌ Error saving score to leaderboard:', error)
         // No fallar el request si no se puede guardar el score

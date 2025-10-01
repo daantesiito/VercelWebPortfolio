@@ -5,6 +5,7 @@ import { getTopStreakScores, type TopScore } from '@/lib/scores';
 import AuthButton from '@/components/AuthButton';
 import ClientProviders from './ClientProviders';
 import './styles.css';
+import Head from 'next/head';
 
 // Forzar Node.js runtime para Prisma
 export const runtime = 'nodejs';
@@ -54,10 +55,32 @@ export default async function TwitchdlePage() {
     );
   }
 
+  const currentDate = new Date().toISOString().split('T')[0];
+  const userId = session.user.id;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <ClientProviders streakScores={streakScores} />
-    </div>
+    <>
+      <Head>
+        {/* Preloads críticos - NYT style */}
+        <link rel="preconnect" href="https://static-cdn.jtvnw.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://static-cdn.jtvnw.net" />
+        
+        {/* Preload de recursos críticos del juego */}
+        <link rel="preload" as="image" href="/games/twitchdle/media/VERDE.png" />
+        <link rel="preload" as="image" href="/games/twitchdle/media/AMARILLO.png" />
+        <link rel="preload" as="image" href="/games/twitchdle/media/GRIS.png" />
+        <link rel="preload" as="image" href="/games/twitchdle/media/twitchLogo.png" />
+        
+        {/* Preload de algunos emotes críticos */}
+        <link rel="preload" as="image" href="/games/twitchdle/media/7tv/1.gif" />
+        <link rel="preload" as="image" href="/games/twitchdle/media/7tv/2.gif" />
+        <link rel="preload" as="image" href="/games/twitchdle/media/7tv/3.gif" />
+      </Head>
+      
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <ClientProviders streakScores={streakScores} />
+      </div>
+    </>
   );
 }
 

@@ -5,6 +5,7 @@ export interface TopScore {
   avatarUrl: string | null
   twitchLogin: string
   value: number
+  userId?: string
 }
 
 export async function getTopScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
@@ -18,6 +19,7 @@ export async function getTopScores(gameSlug: string, limit: number = 10): Promis
       avatarUrl: score.avatarurl || score.avatarUrl,
       twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
+      userId: score.userid || score.userId,
     }))
   } catch (error) {
     console.error('❌ getTopScores error:', error);
@@ -36,6 +38,7 @@ export async function getTopStreamerScores(gameSlug: string, limit: number = 10)
       avatarUrl: score.avatarurl || score.avatarUrl,
       twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
+      userId: score.userid || score.userId,
     }))
   } catch (error) {
     console.error('❌ getTopStreamerScores error:', error);
@@ -48,6 +51,12 @@ export async function upsertBestScore(
   gameSlug: string,
   value: number
 ): Promise<{ best: number; updated: boolean }> {
+  // Para Twitchdle, usar lógica específica de racha
+  if (gameSlug === 'twitchdle') {
+    return await upsertTwitchdleStreak(userId, value)
+  }
+  
+  // Para otros juegos, usar lógica de mejor score
   const { upsertScore } = await import('./database')
   
   try {
@@ -55,6 +64,35 @@ export async function upsertBestScore(
     return { best: result.value, updated: true }
   } catch (error) {
     console.error('❌ Error upserting score:', error)
+    return { best: 0, updated: false }
+  }
+}
+
+// Función específica para manejar rachas de Twitchdle
+async function upsertTwitchdleStreak(
+  userId: string,
+  currentStreak: number
+): Promise<{ best: number; updated: boolean }> {
+  const { query } = await import('./database')
+  
+  try {
+    console.log('🔍 upsertTwitchdleStreak called:', { userId, currentStreak })
+    
+    const queryText = `
+      INSERT INTO "Score" (id, "userId", "gameSlug", value, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())
+      ON CONFLICT ("userId", "gameSlug") DO UPDATE SET
+        value = EXCLUDED.value,  -- Siempre actualizar con el valor actual (no GREATEST)
+        "updatedAt" = NOW()
+      RETURNING value
+    `
+    
+    const result = await query(queryText, [userId, 'twitchdle', currentStreak])
+    console.log('✅ Twitchdle streak updated:', result.rows[0])
+    
+    return { best: result.rows[0].value, updated: true }
+  } catch (error) {
+    console.error('❌ Error upserting Twitchdle streak:', error)
     return { best: 0, updated: false }
   }
 }
@@ -76,6 +114,7 @@ export async function getTopStreakScores(gameSlug: string, limit: number = 10): 
       avatarUrl: score.avatarurl || score.avatarUrl,
       twitchLogin: score.twitchLogin || 'unknown',
       value: score.value,
+      userId: score.userid || score.userId,
     }))
   } catch (error) {
     console.error('❌ getTopStreakScores error:', error);
