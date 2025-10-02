@@ -51,8 +51,7 @@ export async function POST(request: NextRequest) {
       attempts, 
       streak, 
       maxStreak,
-      guess, // Palabra que el usuario está intentando adivinar
-      isNewGame // Flag para indicar si es un juego nuevo
+      guess // Palabra que el usuario está intentando adivinar
     } = body
     
     console.log('💾 POST /api/twitchdle/game:', { 
@@ -110,7 +109,8 @@ export async function POST(request: NextRequest) {
     if (gameFinished) {
       try {
         const { upsertBestScore } = await import('@/lib/scores')
-        const scoreToSave = won ? streak : 0 // Si gana, guardar la racha; si pierde, guardar 0
+        // Usar maxStreak para el leaderboard (la mejor racha del usuario)
+        const scoreToSave = won ? maxStreak : 0 // Si gana, guardar la racha máxima; si pierde, guardar 0
         await upsertBestScore(
           session.user.id,
           'twitchdle',
@@ -120,7 +120,8 @@ export async function POST(request: NextRequest) {
           userId: session.user.id, 
           score: scoreToSave, 
           won: won,
-          streak: streak 
+          currentStreak: streak,
+          maxStreak: maxStreak
         })
       } catch (error) {
         console.error('❌ Error saving score to leaderboard:', error)

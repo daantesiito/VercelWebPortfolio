@@ -27,7 +27,7 @@ export const projects: Project[] = [
   {
     id: "twitchdle",
     title: "Twitchdle",
-      description: "Juego de adivinanza inspirado en Wordle pero con streamers de Twitch/Kick. Adivina el streamer descubriendo letras con palabras. Implementado con HTML, CSS y JavaScript.",
+      description: "Juego de adivinanza inspirado en Wordle pero con streamers de Twitch/Kick. Adivina el streamer del día descubriendo letras con palabras. Implementado con HTML, CSS y JavaScript.",
     image: "/images/twitchdle.jpg",
     href: "https://dantesito.dev/games/twitchdle/",
     kind: "game"

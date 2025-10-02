@@ -12,7 +12,7 @@
 }
 
 .leaderboard-container h3 {
-  color: #8f7a66;
+  color: #c096ff;
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 12px;
@@ -62,7 +62,7 @@
 }
 
 .leaderboard-rank {
-  background-color: #8f7a66;
+  background-color: #c096ff;
   color: white;
   font-weight: bold;
   font-size: 12px;
@@ -110,7 +110,7 @@
 }
 
 .leaderboard-score {
-  color: #8f7a66;
+  color: #c096ff;
   font-weight: bold;
   font-size: 14px;
 }

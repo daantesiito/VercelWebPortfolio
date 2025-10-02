@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useTwitchdleGame } from '../hooks/useTwitchdleGame'
+import { useNextWordCountdown } from '../hooks/useNextWordCountdown'
 
 export default function TwitchdleGame() {
   const { data: session } = useSession()
-  const { gameState, loading, error, saveGame, updateLocalState, validateWord, setGameState, onType, onBackspace, onEnter } = useTwitchdleGame()
+  const { gameState, loading, error, saveGame, updateLocalState, validateWord, setGameState, onType, onBackspace, onEnter, stats } = useTwitchdleGame()
+  const nextWordCountdown = useNextWordCountdown()
   
   // Función para construir la distribución de intentos
   const buildDistribution = (gameState: any) => {
@@ -19,19 +21,6 @@ export default function TwitchdleGame() {
   
   const [showInstructions, setShowInstructions] = useState(false)
   const [message, setMessage] = useState('')
-  const [showGameOverModal, setShowGameOverModal] = useState(false)
-  const [modalMessage, setModalMessage] = useState('')
-  const [modalCountdown, setModalCountdown] = useState('')
-  const [showStatsScreen, setShowStatsScreen] = useState(false)
-  const [gameStats, setGameStats] = useState({
-    gamesPlayed: 0,
-    victories: 0,
-    currentStreak: 0,
-    maxStreak: 0,
-    guessDistribution: [0, 0, 0, 0, 0, 0],
-    lastGameResult: null as any,
-    emojiGrid: ''
-  })
   
 
   const boardRef = useRef<HTMLDivElement>(null)
@@ -92,12 +81,41 @@ export default function TwitchdleGame() {
           if (isMobile) numEmotes = 30
           
           const emoteSources = [
-            '/games/twitchdle/media/7tv/1.gif', '/games/twitchdle/media/7tv/2.gif',
-            '/games/twitchdle/media/7tv/3.gif', '/games/twitchdle/media/7tv/4.gif',
-            '/games/twitchdle/media/7tv/5.gif', '/games/twitchdle/media/7tv/6.gif',
-            '/games/twitchdle/media/7tv/7.gif', '/games/twitchdle/media/7tv/8.gif',
-            '/games/twitchdle/media/7tv/9.gif', '/games/twitchdle/media/7tv/10.gif'
-          ]
+            '/games/twitchdle/media/7tv/1.gif',
+            '/games/twitchdle/media/7tv/2.gif',
+            '/games/twitchdle/media/7tv/3.gif',
+            '/games/twitchdle/media/7tv/3x.gif',
+            '/games/twitchdle/media/7tv/4.gif',
+            '/games/twitchdle/media/7tv/5.gif',
+            '/games/twitchdle/media/7tv/6.gif',
+            '/games/twitchdle/media/7tv/7.gif',
+            '/games/twitchdle/media/7tv/8.gif',
+            '/games/twitchdle/media/7tv/9.gif',
+            '/games/twitchdle/media/7tv/10.gif',
+            '/games/twitchdle/media/7tv/11.gif',
+            '/games/twitchdle/media/7tv/12.gif',
+            '/games/twitchdle/media/7tv/13.gif',
+            '/games/twitchdle/media/7tv/14.gif',
+            '/games/twitchdle/media/7tv/15.gif',
+            '/games/twitchdle/media/7tv/32.gif',
+            '/games/twitchdle/media/7tv/44.gif',
+            '/games/twitchdle/media/7tv/BASEDCIGAR.gif',
+            '/games/twitchdle/media/7tv/catJam.gif',
+            '/games/twitchdle/media/7tv/Nerd.gif',
+            '/games/twitchdle/media/7tv/happi.gif',
+            '/games/twitchdle/media/7tv/JIJO.gif',
+            '/games/twitchdle/media/7tv/nowaying.gif',
+            '/games/twitchdle/media/7tv/omegalul.gif',
+            '/games/twitchdle/media/7tv/Nerdd.png',
+            '/games/twitchdle/media/7tv/sadcat.gif',
+            '/games/twitchdle/media/7tv/Sadge.gif',
+            '/games/twitchdle/media/7tv/nerd.png',
+            '/games/twitchdle/media/7tv/Nerdge.gif',
+            '/games/twitchdle/media/7tv/sigma.gif',
+            '/games/twitchdle/media/7tv/sigmaArrive.gif',
+            '/games/twitchdle/media/7tv/yipe.gif',
+            '/games/twitchdle/media/7tv/yump.gif'
+        ];
 
           const emoteContainer = document.getElementById('emote-container')
           
@@ -133,55 +151,10 @@ export default function TwitchdleGame() {
         }
       }, [])
 
-  // Actualizar gameStats cuando se carga el juego
+  // Disparar evento para actualizar el leaderboard si ganó
   useEffect(() => {
-    if (gameState) {
-      const updateStats = () => {
-        // Crear distribución de intentos basada en el juego actual
-        const guessDistribution = buildDistribution(gameState)
-        
-        // Si el juego terminó, mostrar stats inmediatamente con wordOfDay del estado
-        if (gameState.gameFinished) {
-          setGameStats({
-            gamesPlayed: 1,
-            victories: gameState.won ? 1 : 0,
-            currentStreak: gameState.streak,
-            maxStreak: gameState.maxStreak,
-            guessDistribution,
-            lastGameResult: {
-              won: gameState.won,
-              wordToGuess: gameState.wordOfDay || 'Palabra no disponible',
-              attempts: gameState.attempts
-            },
-            emojiGrid: generateEmojiGrid(gameState.committedBoard, gameState.attempts)
-          })
-        } else {
-          // Si el juego no terminó, solo actualizar estadísticas básicas
-          setGameStats(prev => ({
-            ...prev,
-            gamesPlayed: 1,
-            victories: gameState.won ? 1 : 0,
-            currentStreak: gameState.streak,
-            maxStreak: gameState.maxStreak,
-            guessDistribution,
-            lastGameResult: null,
-            emojiGrid: ''
-          }))
-        }
-      }
-      
-      updateStats()
-    }
-  }, [gameState])
-
-  // Mostrar pantalla de estadísticas cuando el juego termina
-  useEffect(() => {
-    if (gameState?.gameFinished) {
-      setShowStatsScreen(true)
-      // Disparar evento para actualizar el leaderboard si ganó
-      if (gameState.won) {
-        window.dispatchEvent(new CustomEvent('streakUpdated'))
-      }
+    if (gameState?.gameFinished && gameState.won) {
+      window.dispatchEvent(new CustomEvent('streakUpdated'))
     }
   }, [gameState?.gameFinished, gameState?.won])
 
@@ -236,7 +209,7 @@ export default function TwitchdleGame() {
       <div className="twitchdle-container">
         <h1>Twitchdle</h1>
         <div className="container">
-          <p>Cargando juego...</p>
+          <h2 className="text-2xl font-bold mt-14"> Cargando streamer del día...</h2>
         </div>
       </div>
     )
@@ -280,32 +253,32 @@ export default function TwitchdleGame() {
               <span className="close" onClick={() => setShowInstructions(false)}>&times;</span>
               <div className="instructions-content">
                 <p>
-                  El objetivo del juego es simple, adivinar la palabra oculta. La palabra puede tener entre 3 y 7 letras y tenes 6 intentos para adivinarla.
+                  El objetivo del juego es adivinar el streamer del día. Tenes 6 intentos para adivinarlo.
+                </p>
+                <p>
+                  El nombre del streamer es como se lo conoce. Hay nombres recortados por ser muy largos o contener letras repetidas.
+                </p>
+                <p>
+                  Por ejemplo con mi user: "daantesiito" se deberia adivinar "dantesito".
                 </p>
                 <p> 
-                  La tematica es de twitch/kick o el ambiente del streaming en si. La palabra puede ser un streamer u otra cosa relacionada con el stream.
-                </p>
-                <p> 
-                  La palabra es la misma para todas las personas en ese día. Cada intento debe ser una palabra válida. En cada ronda, el juego 
+                  La palabra es la misma para todas las personas en ese día. En cada ronda, el juego 
                   pinta cada letra de un color indicando si esa letra se encuentra o no en la palabra y si está en la posición correcta.
                 </p>
                 <p>
-                  <span style={{color: 'var(--col-correct)', fontWeight: 'bold'}}>VERDE</span> 
-                  significa que la letra está en la palabra y en la posición CORRECTA 
                   <img src="/games/twitchdle/media/VERDE.png" alt="Letra verde" className="instruction-icon" />
+                  <span style={{color: 'var(--col-correct)', fontWeight: 'bold'}}>VERDE </span> 
+                  significa que la letra está en la palabra y en la posición CORRECTA 
                 </p>
                 <p>
-                  <span style={{color: 'var(--col-present)', fontWeight: 'bold'}}>AMARILLO</span> 
-                  significa que la letra está presente en la palabra pero en la posición INCORRECTA 
                   <img src="/games/twitchdle/media/AMARILLO.png" alt="Letra amarilla" className="instruction-icon" />
+                  <span style={{color: 'var(--col-present)', fontWeight: 'bold'}}>AMARILLO </span> 
+                  significa que la letra está presente en la palabra pero en la posición INCORRECTA 
                 </p>
                 <p>
-                  <span style={{color: 'var(--col-absent)', fontWeight: 'bold'}}>GRIS</span> 
-                  significa que la letra NO está presente en la palabra 
                   <img src="/games/twitchdle/media/GRIS.png" alt="Letra gris" className="instruction-icon" />
-                </p>
-                <p> 
-                  Cualquier aporte de palabra para adivinar o si intentaste alguna palabra que pensas que tiene que estar en el diccionario para validarse, mandamela por discord: 326820001879162880
+                  <span style={{color: 'var(--col-absent)', fontWeight: 'bold'}}>GRIS </span> 
+                  significa que la letra NO está presente en la palabra 
                 </p>
                 <p> 
                   El login con twitch solo guarda tu nombre de usuario para poder usarlo como &quot;cuenta&quot; y que no se repita.
@@ -316,7 +289,7 @@ export default function TwitchdleGame() {
         )}
 
         <div className="container">
-          {!showStatsScreen && !gameState.gameFinished ? (
+          {!gameState.gameFinished ? (
             <>
               <div 
                 ref={boardRef} 
@@ -413,108 +386,74 @@ export default function TwitchdleGame() {
             </>
           ) : (
             <div className="stats-content">
-              <h2>¡Ya jugaste!</h2>
+              <h2>{gameState.won ? '¡Felicidades!' : '¡Intentalo de nuevo mañana!'}</h2>
               
-              {gameStats.lastGameResult && (
-                <>
-                  <p className="game-result">
-                    {gameStats.lastGameResult.won 
-                      ? `¡Felicidades! ¡Adivinaste la palabra: "${gameStats.lastGameResult.wordToGuess}"!`
-                      : `No lograste acertar, palabra correcta: "${gameStats.lastGameResult.wordToGuess}"`
-                    }
-                  </p>
-                  
-                  <div className="emoji-grid">
-                    <pre>{gameStats.emojiGrid}</pre>
+              <p className="game-result">
+                {gameState.won 
+                  ? `¡Adivinaste el streamer de hoy: ${stats.wordOfDay || gameState.wordOfDay}!`
+                  : `No lograste acertar, streamer de hoy: "${stats.wordOfDay || gameState.wordOfDay}"`
+                }
+              </p>
+              
+              <div className="emoji-grid">
+                <pre>{stats.emojiGrid}</pre>
+              </div>
+              
+              <p className="next-word-countdown">
+                Siguiente palabra en: {nextWordCountdown}
+              </p>
+              
+              <div className="stats-section">
+                <h3>Estadísticas</h3>
+                <div className="stats-grid">
+                  <div className="stat-item">
+                    <span className="stat-label">Jugadas:</span>
+                    <span className="stat-value">{stats.totalGames}</span>
                   </div>
-                  
-                  <p className="next-word-countdown">{modalCountdown}</p>
-                  
-                  <div className="stats-section">
-                    <h3>Estadísticas</h3>
-                    <div className="stats-grid">
-                      <div className="stat-item">
-                        <span className="stat-label">Jugadas:</span>
-                        <span className="stat-value">{gameStats.gamesPlayed}</span>
+                  <div className="stat-item">
+                    <span className="stat-label">Victorias:</span>
+                    <span className="stat-value">{stats.successRate}%</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Racha Actual:</span>
+                    <span className="stat-value">{stats.currentStreak}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Mejor Racha:</span>
+                    <span className="stat-value">{stats.maxStreak}</span>
+                  </div>
+                </div>
+                
+                <div className="guess-distribution">
+                  <h4>Distribución de wins:</h4>
+                  {stats.winDistribution.map((count, index) => (
+                    <div key={index} className="guess-row">
+                      <span className="guess-number">{index + 1}:</span>
+                      <div className="guess-bar">
+                        <div 
+                          className="guess-fill" 
+                          style={{ 
+                            width: stats.victories > 0 ? `${(count / stats.victories) * 100}%` : '0%' 
+                          }}
+                        ></div>
                       </div>
-                      <div className="stat-item">
-                        <span className="stat-label">Victorias:</span>
-                        <span className="stat-value">
-                          {gameStats.gamesPlayed > 0 ? ((gameStats.victories / gameStats.gamesPlayed) * 100).toFixed(2) : '0.00'}%
-                        </span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-label">Racha Actual:</span>
-                        <span className="stat-value">{gameStats.currentStreak}</span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-label">Mejor Racha:</span>
-                        <span className="stat-value">{gameStats.maxStreak}</span>
-                      </div>
+                      <span className="guess-count">
+                        {count} ({stats.victories > 0 ? ((count / stats.victories) * 100).toFixed(2) : '0.00'}%)
+                      </span>
                     </div>
-                    
-                    <div className="guess-distribution">
-                      <h4>Distribución de intentos:</h4>
-                      {gameStats.guessDistribution.map((count, index) => (
-                        <div key={index} className="guess-row">
-                          <span className="guess-number">{index + 1}:</span>
-                          <div className="guess-bar">
-                            <div 
-                              className="guess-fill" 
-                              style={{ 
-                                width: gameStats.victories > 0 ? `${(count / gameStats.victories) * 100}%` : '0%' 
-                              }}
-                            ></div>
-                          </div>
-                          <span className="guess-count">
-                            {count} ({gameStats.victories > 0 ? ((count / gameStats.victories) * 100).toFixed(2) : '0.00'}%)
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Social buttons */}
-                  <div className="social-buttons">
-                    <a href="https://cafecito.app/dantesiito" target="_blank" className="social-button cafecito">
-                      <i className="fas fa-coffee"></i>
-                    </a>
-                    <a href="https://github.com/daantesiito" target="_blank" className="social-button github">
-                      <i className="fab fa-github"></i>
-                    </a>
-                    <a href="https://www.instagram.com/dante_puddu/" target="_blank" className="social-button instagram">
-                      <i className="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://www.twitch.tv/daantesiito" target="_blank" className="social-button twitch">
-                      <i className="fab fa-twitch"></i>
-                    </a>
-                    <a href="https://discordapp.com/users/326820001879162880" target="_blank" className="social-button discord">
-                      <i className="fab fa-discord"></i>
-                    </a>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {showGameOverModal && (
-          <div className="modal">
-            <div className="modal-content">
-              <span className="close" onClick={() => {
-                console.log('❌ Modal close clicked')
-                setShowGameOverModal(false)
-                setShowStatsScreen(true)
-              }}>&times;</span>
-              <p>{modalMessage}</p>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Social buttons */}
               <div className="social-buttons">
-                <a href="https://ko-fi.com/dantesito" target="_blank" className="social-button kofi">
+                <a href="https://cafecito.app/dantesiito" target="_blank" className="social-button cafecito">
                   <i className="fas fa-coffee"></i>
                 </a>
-                <a href="https://github.com/dantesito" target="_blank" className="social-button github">
+                <a href="https://github.com/daantesiito" target="_blank" className="social-button github">
                   <i className="fab fa-github"></i>
                 </a>
-                <a href="https://www.instagram.com/dantesito.dev/" target="_blank" className="social-button instagram">
+                <a href="https://www.instagram.com/dante_puddu/" target="_blank" className="social-button instagram">
                   <i className="fab fa-instagram"></i>
                 </a>
                 <a href="https://www.twitch.tv/daantesiito" target="_blank" className="social-button twitch">
@@ -525,8 +464,9 @@ export default function TwitchdleGame() {
                 </a>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
       </div>
     </>
   )

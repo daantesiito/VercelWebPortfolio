@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Twitchdle - Adivina la palabra del día',
-  description: 'Adivina la palabra del día relacionada con Twitch y el streaming. ¡Juega todos los días y mantén tu racha!',
+  title: 'Twitchdle - Adivina el streamer del día',
+  description: 'Adivina el Streamer del día. Juga todos los días para mantener tu racha!',
 };
 
 export default function TwitchdleLayout({

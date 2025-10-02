@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 import { authOptions } from '@/lib/auth'
-import { getTopScores, getTopStreamerScores, getTopStreakScores, upsertBestScore, validateGameSlug, validateScoreValue } from '@/lib/scores'
+import { getTopScores, getTopStreamerScores, getTopStreakScores, getTwitchdleLeaderboard, upsertBestScore, validateGameSlug, validateScoreValue } from '@/lib/scores'
 
 const ScoreRequestSchema = z.object({
   game: z.string().min(1),
@@ -32,7 +32,10 @@ export async function GET(request: NextRequest) {
     }
 
     let scores
-    if (streakOnly) {
+    if (game === 'twitchdle' && streakOnly) {
+      // Para Twitchdle, usar la nueva tabla de estadísticas
+      scores = await getTwitchdleLeaderboard(limit)
+    } else if (streakOnly) {
       scores = await getTopStreakScores(game, limit)
     } else if (streamersOnly) {
       scores = await getTopStreamerScores(game, limit)

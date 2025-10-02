@@ -196,9 +196,10 @@ function removeDuplicates(leaderboard: any[]): any[] {
 export function bumpMyStreakOptimistic(
   userId: string, 
   dateKey: string, 
-  userInfo?: { displayName?: string; twitchLogin?: string; avatarUrl?: string }
+  userInfo?: { displayName?: string; twitchLogin?: string; avatarUrl?: string },
+  bestStreak?: number
 ) {
-  console.log('🚀 Updating leaderboard optimistically:', { userId, userInfo })
+  console.log('🚀 Updating leaderboard optimistically:', { userId, userInfo, bestStreak })
   
   queryClient.setQueryData<any[]>(['leaderboard', 'streak', dateKey], (prev) => {
     if (!prev) return prev
@@ -209,15 +210,16 @@ export function bumpMyStreakOptimistic(
     const me = copy.find(r => r.userId === userId)
     
     if (me) {
-      // Usuario ya existe en el leaderboard
-      me.value = Math.max(me.value ?? 0, (me.value ?? 0) + 1)
+      // Usuario ya existe en el leaderboard - usar la racha máxima si se proporciona
+      const newValue = bestStreak || Math.max(me.value ?? 0, (me.value ?? 0) + 1)
+      me.value = newValue
       me.updatedAt = new Date().toISOString()
       console.log('✅ Updated existing user in leaderboard:', me)
     } else {
       // Usuario nuevo en el leaderboard
       const newEntry = {
         userId,
-        value: 1,
+        value: bestStreak || 1,
         displayName: userInfo?.displayName || userInfo?.twitchLogin || 'Jugador',
         twitchLogin: userInfo?.twitchLogin || 'unknown',
         avatarUrl: userInfo?.avatarUrl || null,

@@ -1,4 +1,5 @@
 import { getScores } from './database'
+import { prisma } from './prisma'
 
 export interface TopScore {
   displayName: string
@@ -46,6 +47,22 @@ export async function getTopStreamerScores(gameSlug: string, limit: number = 10)
   }
 }
 
+// Nueva función para obtener leaderboard desde TwitchdleStats
+export async function getTwitchdleLeaderboard(limit: number = 10): Promise<TopScore[]> {
+  try {
+    console.log(`🔍 getTwitchdleLeaderboard: Fetching ${limit} scores from TwitchdleStats`);
+    
+    // TODO: Implementar cuando se cree la tabla TwitchdleStats
+    // Por ahora, devolver array vacío
+    console.log('⚠️ TwitchdleStats table not created yet, returning empty leaderboard');
+    
+    return []
+  } catch (error) {
+    console.error('❌ getTwitchdleLeaderboard error:', error);
+    return [];
+  }
+}
+
 export async function upsertBestScore(
   userId: string,
   gameSlug: string,
@@ -89,6 +106,7 @@ async function upsertTwitchdleStreak(
     
     const result = await query(queryText, [userId, 'twitchdle', currentStreak])
     console.log('✅ Twitchdle streak updated:', result.rows[0])
+    console.log('📊 Full result:', result)
     
     return { best: result.rows[0].value, updated: true }
   } catch (error) {

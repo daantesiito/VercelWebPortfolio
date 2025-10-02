@@ -12,11 +12,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Twitchdle - Adivina la palabra del día',
-  description: 'Adivina la palabra del día relacionada con Twitch y el streaming. ¡Juega todos los días y mantén tu racha!',
+  title: 'Twitchdle - Adivina el streamer del día',
+  description: 'Adivina el Streamer del día. Juga todos los días para mantener tu racha!',
   openGraph: {
-    title: 'Twitchdle - Adivina la palabra del día',
-    description: 'Adivina la palabra del día relacionada con Twitch y el streaming. ¡Juega todos los días y mantén tu racha!',
+    title: 'Twitchdle - Adivina el streamer del día',
+    description: 'Adivina el Streamer del día. Juga todos los días para mantener tu racha!',
     images: ['/images/twitchdle.jpg'],
   },
 };
@@ -44,8 +44,9 @@ export default async function TwitchdlePage() {
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-white mb-8">Twitchdle</h1>
+          <h2 className="text-2xl font-bold text-white mb-4">El Wordle de Streamers</h2>
           <p className="text-xl text-gray-300 mb-8">
-            Adivina la palabra del día relacionada con Twitch y el streaming
+            Adivina el streamer del día. Juga todos los días para mantener tu racha!
           </p>
           <div className="flex justify-center">
             <AuthButton callbackUrl="/games/twitchdle" />
