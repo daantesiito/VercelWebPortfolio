@@ -888,7 +888,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 '/games/twitchdle/media/7tv/sigma.gif',
                 '/games/twitchdle/media/7tv/sigmaArrive.gif',
                 '/games/twitchdle/media/7tv/yipe.gif',
-                '/games/twitchdle/media/7tv/yump.gif'
+                '/games/twitchdle/media/7tv/yump.gif',
+                '/games/twitchdle/media/7tv/aJugar-2x.gif',
+                '/games/twitchdle/media/7tv/BANGER-3x.gif',
+                '/games/twitchdle/media/7tv/c32-3x.png',
+                '/games/twitchdle/media/7tv/cobrixDance-4x.gif',
+                '/games/twitchdle/media/7tv/Cooked-3x.png',
+                '/games/twitchdle/media/7tv/dans-4x.png',
+                '/games/twitchdle/media/7tv/davoDance-2x.gif',
+                '/games/twitchdle/media/7tv/enfadao-3x.png',
+                '/games/twitchdle/media/7tv/FINALLY-3x.gif',
+                '/games/twitchdle/media/7tv/LO-3x.gif',
+                '/games/twitchdle/media/7tv/LOL-3x.gif',
+                '/games/twitchdle/media/7tv/ome45-3x.gif',
+                '/games/twitchdle/media/7tv/omeScrajj-3x.gif',
+                '/games/twitchdle/media/7tv/RingWide-3x.gif',
+                '/games/twitchdle/media/7tv/thatsCrazy-3x.gif',
+                '/games/twitchdle/media/7tv/VOIDJ-3x.png',
+                '/games/twitchdle/media/7tv/WHAAAT-3x.gif',
+                '/games/twitchdle/media/7tv/YAAAY-3x.gif'
             ];
 
             const emoteContainer = document.getElementById('emote-container');

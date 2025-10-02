@@ -12,10 +12,10 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Twitchdle - Adivina el streamer del día',
+  title: 'Twitchdle - dantesito.dev',
   description: 'Adivina el Streamer del día. Juga todos los días para mantener tu racha!',
   openGraph: {
-    title: 'Twitchdle - Adivina el streamer del día',
+    title: 'Twitchdle - dantesito.dev',
     description: 'Adivina el Streamer del día. Juga todos los días para mantener tu racha!',
     images: ['/images/twitchdle.jpg'],
   },
@@ -29,7 +29,7 @@ export default async function TwitchdlePage() {
   
   try {
     console.log('🔍 Fetching streak scores for Twitchdle...');
-    streakScores = await getTopStreakScores('twitchdle', 10);
+    streakScores = await getTopStreakScores('twitchdle', 100);
     console.log('✅ Streak scores fetched successfully:', { 
       streakScoresCount: streakScores.length 
     });
@@ -41,11 +41,11 @@ export default async function TwitchdlePage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#e5d4ff' }}>
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-8">Twitchdle</h1>
-          <h2 className="text-2xl font-bold text-white mb-4">El Wordle de Streamers</h2>
-          <p className="text-xl text-gray-300 mb-8">
+          <h1 className="text-4xl font-bold text-white mb-8" style={{ color: '#634e83' }}>Twitchdle</h1>
+          <h2 className="text-2xl font-bold text-white mb-4" style={{ color: '#634e83' }}>El Wordle de Streamers</h2>
+          <p className="text-xl text-gray-300 mb-8" style={{ color: '#634e83' }}>
             Adivina el streamer del día. Juga todos los días para mantener tu racha!
           </p>
           <div className="flex justify-center">
@@ -78,7 +78,7 @@ export default async function TwitchdlePage() {
         <link rel="preload" as="image" href="/games/twitchdle/media/7tv/3.gif" />
       </Head>
       
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#e5d4ff' }}>
         <ClientProviders streakScores={streakScores} />
       </div>
     </>

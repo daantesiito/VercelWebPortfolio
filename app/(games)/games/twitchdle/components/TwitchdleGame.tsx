@@ -81,41 +81,59 @@ export default function TwitchdleGame() {
           if (isMobile) numEmotes = 30
           
           const emoteSources = [
-            '/games/twitchdle/media/7tv/1.gif',
-            '/games/twitchdle/media/7tv/2.gif',
-            '/games/twitchdle/media/7tv/3.gif',
-            '/games/twitchdle/media/7tv/3x.gif',
-            '/games/twitchdle/media/7tv/4.gif',
-            '/games/twitchdle/media/7tv/5.gif',
-            '/games/twitchdle/media/7tv/6.gif',
-            '/games/twitchdle/media/7tv/7.gif',
-            '/games/twitchdle/media/7tv/8.gif',
-            '/games/twitchdle/media/7tv/9.gif',
-            '/games/twitchdle/media/7tv/10.gif',
-            '/games/twitchdle/media/7tv/11.gif',
-            '/games/twitchdle/media/7tv/12.gif',
-            '/games/twitchdle/media/7tv/13.gif',
-            '/games/twitchdle/media/7tv/14.gif',
-            '/games/twitchdle/media/7tv/15.gif',
-            '/games/twitchdle/media/7tv/32.gif',
-            '/games/twitchdle/media/7tv/44.gif',
-            '/games/twitchdle/media/7tv/BASEDCIGAR.gif',
-            '/games/twitchdle/media/7tv/catJam.gif',
-            '/games/twitchdle/media/7tv/Nerd.gif',
-            '/games/twitchdle/media/7tv/happi.gif',
-            '/games/twitchdle/media/7tv/JIJO.gif',
-            '/games/twitchdle/media/7tv/nowaying.gif',
-            '/games/twitchdle/media/7tv/omegalul.gif',
-            '/games/twitchdle/media/7tv/Nerdd.png',
-            '/games/twitchdle/media/7tv/sadcat.gif',
-            '/games/twitchdle/media/7tv/Sadge.gif',
-            '/games/twitchdle/media/7tv/nerd.png',
-            '/games/twitchdle/media/7tv/Nerdge.gif',
-            '/games/twitchdle/media/7tv/sigma.gif',
-            '/games/twitchdle/media/7tv/sigmaArrive.gif',
-            '/games/twitchdle/media/7tv/yipe.gif',
-            '/games/twitchdle/media/7tv/yump.gif'
-        ];
+                '/games/twitchdle/media/7tv/1.gif',
+                '/games/twitchdle/media/7tv/2.gif',
+                '/games/twitchdle/media/7tv/3.gif',
+                '/games/twitchdle/media/7tv/3x.gif',
+                '/games/twitchdle/media/7tv/4.gif',
+                '/games/twitchdle/media/7tv/5.gif',
+                '/games/twitchdle/media/7tv/6.gif',
+                '/games/twitchdle/media/7tv/7.gif',
+                '/games/twitchdle/media/7tv/8.gif',
+                '/games/twitchdle/media/7tv/9.gif',
+                '/games/twitchdle/media/7tv/10.gif',
+                '/games/twitchdle/media/7tv/11.gif',
+                '/games/twitchdle/media/7tv/12.gif',
+                '/games/twitchdle/media/7tv/13.gif',
+                '/games/twitchdle/media/7tv/14.gif',
+                '/games/twitchdle/media/7tv/15.gif',
+                '/games/twitchdle/media/7tv/32.gif',
+                '/games/twitchdle/media/7tv/44.gif',
+                '/games/twitchdle/media/7tv/BASEDCIGAR.gif',
+                '/games/twitchdle/media/7tv/catJam.gif',
+                '/games/twitchdle/media/7tv/Nerd.gif',
+                '/games/twitchdle/media/7tv/happi.gif',
+                '/games/twitchdle/media/7tv/JIJO.gif',
+                '/games/twitchdle/media/7tv/nowaying.gif',
+                '/games/twitchdle/media/7tv/omegalul.gif',
+                '/games/twitchdle/media/7tv/Nerdd.png',
+                '/games/twitchdle/media/7tv/sadcat.gif',
+                '/games/twitchdle/media/7tv/Sadge.gif',
+                '/games/twitchdle/media/7tv/nerd.png',
+                '/games/twitchdle/media/7tv/Nerdge.gif',
+                '/games/twitchdle/media/7tv/sigma.gif',
+                '/games/twitchdle/media/7tv/sigmaArrive.gif',
+                '/games/twitchdle/media/7tv/yipe.gif',
+                '/games/twitchdle/media/7tv/yump.gif',
+                '/games/twitchdle/media/7tv/aJugar-2x.gif',
+                '/games/twitchdle/media/7tv/BANGER-3x.gif',
+                '/games/twitchdle/media/7tv/c32-3x.png',
+                '/games/twitchdle/media/7tv/cobrixDance-4x.gif',
+                '/games/twitchdle/media/7tv/Cooked-3x.png',
+                '/games/twitchdle/media/7tv/dans-4x.png',
+                '/games/twitchdle/media/7tv/davoDance-2x.gif',
+                '/games/twitchdle/media/7tv/enfadao-3x.png',
+                '/games/twitchdle/media/7tv/FINALLY-3x.gif',
+                '/games/twitchdle/media/7tv/LO-3x.gif',
+                '/games/twitchdle/media/7tv/LOL-3x.gif',
+                '/games/twitchdle/media/7tv/ome45-3x.gif',
+                '/games/twitchdle/media/7tv/omeScrajj-3x.gif',
+                '/games/twitchdle/media/7tv/RingWide-3x.gif',
+                '/games/twitchdle/media/7tv/thatsCrazy-3x.gif',
+                '/games/twitchdle/media/7tv/VOIDJ-3x.png',
+                '/games/twitchdle/media/7tv/WHAAAT-3x.gif',
+                '/games/twitchdle/media/7tv/YAAAY-3x.gif'
+            ];
 
           const emoteContainer = document.getElementById('emote-container')
           
@@ -259,7 +277,7 @@ export default function TwitchdleGame() {
                   El nombre del streamer es como se lo conoce. Hay nombres recortados por ser muy largos o contener letras repetidas.
                 </p>
                 <p>
-                  Por ejemplo con mi user: "daantesiito" se deberia adivinar "dantesito".
+                  Por ejemplo con mi user: &quot;daantesiito&quot; se deberia adivinar &quot;dantesito&quot;.
                 </p>
                 <p> 
                   La palabra es la misma para todas las personas en ese día. En cada ronda, el juego 

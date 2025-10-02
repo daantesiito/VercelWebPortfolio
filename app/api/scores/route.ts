@@ -31,15 +31,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    console.log('🔍 API /api/scores called with:', { game, limit, streamersOnly, streakOnly })
+    
     let scores
-    if (game === 'twitchdle' && streakOnly) {
-      // Para Twitchdle, usar la nueva tabla de estadísticas
-      scores = await getTwitchdleLeaderboard(limit)
-    } else if (streakOnly) {
+    if (streakOnly) {
+      console.log('🔍 Using getTopStreakScores with limit:', limit)
       scores = await getTopStreakScores(game, limit)
     } else if (streamersOnly) {
+      console.log('🔍 Using getTopStreamerScores with limit:', limit)
       scores = await getTopStreamerScores(game, limit)
     } else {
+      console.log('🔍 Using getTopScores with limit:', limit)
       scores = await getTopScores(game, limit)
     }
     

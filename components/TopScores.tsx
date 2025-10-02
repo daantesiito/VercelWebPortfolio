@@ -45,7 +45,7 @@ export default function TopScores({ scores, game, limit = 10, title = "Top" }: T
     <div className="leaderboard-container">
       <h3>🏆 {title}</h3>
       <div className="leaderboard-scroll">
-        {scores.map((score, index) => {
+        {scores.slice(0, limit).map((score, index) => {
           const rank = index + 1;
           const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-4-plus';
           const scoreClass = rank <= 3 ? `score-${rank}` : 'score-4-plus';

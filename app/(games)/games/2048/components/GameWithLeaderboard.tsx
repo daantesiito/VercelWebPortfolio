@@ -18,6 +18,7 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
   const [scores, setScores] = useState<TopScore[]>(initialScores)
   const [streamerScores, setStreamerScores] = useState<TopScore[]>(initialStreamerScores)
   const [isKickTheme, setIsKickTheme] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
   
   // Crear/actualizar usuario en la base de datos
   useUserCreation()
@@ -59,6 +60,9 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
       }
     }
 
+    // Auto-refresh cada 15 segundos
+    const interval = setInterval(updateScores, 15000)
+
     // Agregar event listeners
     window.addEventListener('scoreUpdated', handleScoreUpdated)
     window.addEventListener('themeChanged', handleThemeChange)
@@ -68,6 +72,7 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
 
     // Cleanup
     return () => {
+      clearInterval(interval)
       window.removeEventListener('scoreUpdated', handleScoreUpdated)
       window.removeEventListener('themeChanged', handleThemeChange)
     }
@@ -86,6 +91,17 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
         {/* Perfil de usuario en la esquina superior derecha */}
         <UserProfile />
         
+        {/* Botón de guía debajo del perfil */}
+        <div style={{ position: 'fixed', top: '3vh', right: '35vh', zIndex: 100 }}>
+          <button 
+            className="instructions-toggle-button"
+            onClick={() => setShowGuide(true)}
+            title="Ver guía del juego"
+          >
+            GUÍA
+          </button>
+        </div>
+        
         {/* Leaderboards flotantes en el medio izquierda */}
         <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-10 space-y-4 max-h-[80vh] overflow-y-auto">
           {/* TOP GLOBAL */}
@@ -94,6 +110,21 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
           {/* TOP STREAMERS */}
           <TopScores scores={streamerScores} game="2048" title="TOP STREAMERS" />
         </div>
+        
+        {/* Modal de guía */}
+        {showGuide && (
+          <div className="modal">
+            <div className="modal-content" style={{ maxWidth: '90vw', maxHeight: '90vh', width: 'auto', height: 'auto' }}>
+              <span className="close" onClick={() => setShowGuide(false)}>&times;</span>
+              {/* Imagen de la guía */}
+              <img
+                src="/games/2048/media/guia.png"
+                alt="Guía del juego 2048"
+                style={{ width: '100%', height: 'auto', maxHeight: '80vh', objectFit: 'contain' }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

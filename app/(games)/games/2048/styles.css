@@ -986,3 +986,86 @@
 .game-2048 .discord:hover {
   background-color: #5a6fb1;
 }
+
+.game-2048.kick-theme .instructions-toggle-button {
+  background-color: var(--col-kick-primary);
+  color: var(--col-white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 10px 24px;
+}
+
+.game-2048.kick-theme .instructions-toggle-button:hover {
+  background-color: var(--col-kick-primary-dark);
+}
+
+/* Modal styles for guide button */
+.game-2048 .instructions-toggle-button {
+  background-color: var(--col-primary);
+  color: var(--col-white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 10px 24px;
+}
+
+.game-2048 .instructions-toggle-button:hover {
+  background-color: var(--col-primary-dark);
+}
+
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 40px;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #4a90e2;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+.close:hover {
+    color: white;
+    background-color: #4a90e2;
+    transform: scale(1.1);
+}

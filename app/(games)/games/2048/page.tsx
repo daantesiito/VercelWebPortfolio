@@ -13,15 +13,15 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '2048 — dantesito.dev',
-  description: 'Jugá al juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
-  keywords: ['2048', 'juego', 'twitch', 'emotes', 'dantesito.dev'],
+  description: 'Jugá al clasico 2048 con emotes de 7tv. Combina fichas para llegar al OMEGALUL.',
+  keywords: ['2048', 'juego', 'twitch', 'emotes', 'dantesito.dev', '7tv'],
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
     title: '2048 — dantesito.dev',
-    description: 'Jugá al juego 2048 con emotes de Twitch. Combina fichas para llegar al OMEGALUL.',
+    description: 'Jugá al clasico 2048 con emotes de 7tv. Combina fichas para llegar al OMEGALUL.',
     url: 'https://dantesito.dev/games/2048',
     siteName: 'dantesito.dev',
     images: [
@@ -46,7 +46,7 @@ export default async function Game2048Page() {
         <div className="text-center flex flex-col items-center">
           <h1 className="text-4xl font-bold mb-8" style={{ color: '#634e83' }}>2048</h1>
           <p className="text-xl mb-8" style={{ color: '#634e83' }}>
-            Autorizá con twitch para jugar
+            Jugá al clásico 2048 con emotes de 7tv. Combina fichas para llegar al OMEGALUL.
           </p>
           <div className="flex justify-center">
             <AuthButton callbackUrl="/games/2048" />

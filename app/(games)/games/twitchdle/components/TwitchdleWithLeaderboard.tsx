@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import TwitchdleGame from './TwitchdleGame'
 import TopScores from '@/components/TopScores'
 import UserProfile from './UserProfile'
 import { useUserCreation } from '../hooks/useUserCreation'
 import type { TopScore } from '@/components/TopScores'
-import { useQueryClient } from '@tanstack/react-query'
-import { useLeaderboardLive } from '../hooks/useStats'
 
 interface TwitchdleWithLeaderboardProps {
   initialStreakScores: TopScore[]
@@ -16,34 +14,44 @@ interface TwitchdleWithLeaderboardProps {
 
 export default function TwitchdleWithLeaderboard({ initialStreakScores }: TwitchdleWithLeaderboardProps) {
   const { data: session } = useSession()
+  const [streakScores, setStreakScores] = useState<TopScore[]>(initialStreakScores)
+  
+  // Crear/actualizar usuario en la base de datos
   useUserCreation()
 
-  const dateKey = new Date().toISOString().split('T')[0]
-  const qc = useQueryClient()
-
-  // seed cache con SSR initialStreakScores para paint instantáneo
   useEffect(() => {
-    qc.setQueryData(['leaderboard', 'streak', dateKey], initialStreakScores)
-  }, [qc, dateKey, initialStreakScores])
+    // Función para actualizar los scores
+    const updateScores = async () => {
+      try {
+        const response = await fetch('/api/scores?game=twitchdle&limit=100&streak=true')
+        
+        if (response.ok) {
+          const newScores = await response.json()
+          setStreakScores(newScores)
+        }
+      } catch (error) {
+        // Error fetching scores - silently fail
+      }
+    }
 
-  const { data: streakScores = initialStreakScores } = useLeaderboardLive(dateKey)
-  const typedStreakScores = (streakScores as TopScore[]) || initialStreakScores
-
-  useEffect(() => {
     // Escuchar eventos de score actualizado
     const handleScoreUpdated = () => {
-      // Invalidar cache para refetch
-      qc.invalidateQueries({ queryKey: ['leaderboard', 'streak', dateKey] })
+      // Pequeño delay para asegurar que el score se haya guardado en la DB
+      setTimeout(updateScores, 500)
     }
+
+    // Auto-refresh cada 15 segundos
+    const interval = setInterval(updateScores, 15000)
 
     // Agregar event listener
     window.addEventListener('streakUpdated', handleScoreUpdated)
 
     // Cleanup
     return () => {
+      clearInterval(interval)
       window.removeEventListener('streakUpdated', handleScoreUpdated)
     }
-  }, [qc, dateKey])
+  }, [])
 
   if (!session) {
     return null // El componente padre maneja la pantalla de login
@@ -60,7 +68,7 @@ export default function TwitchdleWithLeaderboard({ initialStreakScores }: Twitch
         
         {/* Leaderboard de racha en el medio izquierda - solo visible cuando NO hay stats screen */}
         <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-10" id="leaderboard-container">
-          <TopScores scores={typedStreakScores} game="twitchdle" title="TOP RACHA" />
+          <TopScores scores={streakScores} game="twitchdle" title="TOP RACHA" limit={100} />
         </div>
       </div>
     </div>

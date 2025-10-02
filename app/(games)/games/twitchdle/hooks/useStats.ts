@@ -7,7 +7,7 @@ export function useLeaderboard(date: string) {
   return useQuery({
     queryKey: ['leaderboard', 'streak', date],
     queryFn: async () => {
-      const res = await fetch(`/api/scores?game=twitchdle&limit=10&streak=true`, {
+      const res = await fetch(`/api/scores?game=twitchdle&limit=100&streak=true`, {
         headers: { 'Cache-Control': 'no-cache' }
       });
       if (res.status === 304) {
@@ -36,7 +36,7 @@ export function useLeaderboardLive(dateKey: string) {
   return useQuery({
     queryKey: ['leaderboard', 'streak', dateKey],
     queryFn: async () => {
-      const res = await fetch(`/api/scores?game=twitchdle&limit=10&streak=true`, { 
+      const res = await fetch(`/api/scores?game=twitchdle&limit=100&streak=true`, { 
         headers: { 'Cache-Control': 'no-cache' }
       });
       if (res.status === 304) {
@@ -75,7 +75,7 @@ export function useLeaderboardLive(dateKey: string) {
           const serverUser = serverUserMap.get(optimisticUser.userId)
           console.log(`🔍 Checking user ${optimisticUser.displayName} (${optimisticUser.userId}):`, {
             foundInServer: !!serverUser,
-            serverUser: serverUser ? { displayName: serverUser.displayName, value: serverUser.value, updatedAt: serverUser.updatedAt } : null
+            serverUser: serverUser ? { displayName: serverUser.displayName, value: serverUser.value } : null
           })
           
           if (!serverUser) {
@@ -86,7 +86,7 @@ export function useLeaderboardLive(dateKey: string) {
           } else {
             // Usuario existe en servidor, verificar si el servidor tiene datos más recientes
             const optimisticTime = new Date(optimisticUser.updatedAt || 0).getTime()
-            const serverTime = new Date(serverUser.updatedAt || 0).getTime()
+            const serverTime = Date.now() // Usar tiempo actual como fallback
             
             console.log(`⏰ Time comparison for ${optimisticUser.displayName}:`, {
               optimisticTime: new Date(optimisticTime).toISOString(),
@@ -116,12 +116,11 @@ export function useLeaderboardLive(dateKey: string) {
             const valueB = b.value || 0
             if (valueA !== valueB) return valueB - valueA
             
-            const timeA = new Date(a.updatedAt || 0).getTime()
-            const timeB = new Date(b.updatedAt || 0).getTime()
-            return timeA - timeB
+            // Ordenar por userId como tie-breaker
+            return (a.userId || '').localeCompare(b.userId || '')
           })
           
-          return mergedData.slice(0, 10)
+          return mergedData.slice(0, 100)
         }
       }
       
@@ -133,17 +132,16 @@ export function useLeaderboardLive(dateKey: string) {
         const valueB = b.value || 0
         if (valueA !== valueB) return valueB - valueA
         
-        const timeA = new Date(a.updatedAt || 0).getTime()
-        const timeB = new Date(b.updatedAt || 0).getTime()
-        return timeA - timeB
+        // Ordenar por userId como tie-breaker
+        return (a.userId || '').localeCompare(b.userId || '')
       })
       
-      return sortedData.slice(0, 10)
+      return sortedData.slice(0, 100)
     },
     placeholderData: (prev) => prev,     // paint instantáneo
     staleTime: 15000,
     refetchInterval: 15000,              // "en vivo"
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,          // refrescar al volver a la pestaña
     gcTime: 24 * 60 * 60 * 1000,
   });
 }
