@@ -28,9 +28,7 @@ export default async function TwitchdlePage() {
   let streakScores: TopScore[] = [];
   
   try {
-    console.log('🔍 Fetching streak scores for Twitchdle...');
     streakScores = await getTopStreakScores('twitchdle', 100);
-    console.log('✅ Streak scores fetched successfully:', { 
       streakScoresCount: streakScores.length 
     });
   } catch (error) {

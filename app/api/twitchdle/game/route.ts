@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0] // YYYY-MM-DD
     
-    console.log('🔍 GET /api/twitchdle/game:', { userId: session.user.id, date })
     
     const game = await getTwitchdleGame(session.user.id, date)
     
@@ -54,7 +53,6 @@ export async function POST(request: NextRequest) {
       guess // Palabra que el usuario está intentando adivinar
     } = body
     
-    console.log('💾 POST /api/twitchdle/game:', { 
       userId: session.user.id, 
       date, 
       gameFinished, 
@@ -116,7 +114,6 @@ export async function POST(request: NextRequest) {
           'twitchdle',
           scoreToSave
         )
-        console.log('✅ Score saved to leaderboard:', { 
           userId: session.user.id, 
           score: scoreToSave, 
           won: won,

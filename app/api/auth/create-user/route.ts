@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
 
     const { twitchId, twitchLogin, displayName, avatarUrl } = await request.json();
 
-    console.log('🔧 Creating/updating user:', {
       userId: session.user.id,
       twitchId,
       twitchLogin,
@@ -34,7 +33,6 @@ export async function POST(request: NextRequest) {
       avatarUrl: avatarUrl,
     });
 
-    console.log('✅ User created/updated successfully:', user.id);
 
     // Actualizar información de streamer en background
     if (twitchId) {

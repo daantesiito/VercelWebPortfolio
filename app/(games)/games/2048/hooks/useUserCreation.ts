@@ -15,7 +15,6 @@ export function useUserCreation() {
       if (user.twitchId && user.twitchLogin) {
         hasCreatedUser.current = true; // Marcar como ejecutado
         
-        console.log('🔧 Creating/updating user in database (one-time):', {
           userId: user.id,
           twitchId: user.twitchId,
           twitchLogin: user.twitchLogin,
@@ -39,7 +38,6 @@ export function useUserCreation() {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            console.log('✅ User created/updated successfully (one-time):', data.user);
           } else {
             console.error('❌ Error creating user:', data.error);
             hasCreatedUser.current = false; // Reset si hay error

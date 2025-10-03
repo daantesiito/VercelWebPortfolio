@@ -64,7 +64,6 @@ export default function TwitchdleGame() {
       // Solo procesar teclas de letras, números, backspace y enter
       const key = event.key.toUpperCase()
       if (key === 'BACKSPACE' || key === 'ENTER' || /^[A-Z0-9]$/.test(key)) {
-        console.log('🎹 Physical key pressed:', key)
         handleKeyPress(key)
       }
     }

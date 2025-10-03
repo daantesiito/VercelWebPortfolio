@@ -121,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
         loadRequiredFiles()
             .then(() => {
-                console.log("Archivos cargados correctamente.");
     
                 if (savedGame && lastPlayedDate === today) {
                     const gameData = JSON.parse(savedGame);

@@ -16,13 +16,10 @@ export function cleanupOldLocalStorage() {
     // Remover las keys encontradas
     keysToRemove.forEach(key => {
       localStorage.removeItem(key)
-      console.log('🗑️ Removed old localStorage key:', key)
     })
     
     if (keysToRemove.length > 0) {
-      console.log(`✅ Cleaned up ${keysToRemove.length} old localStorage entries`)
     } else {
-      console.log('✅ No old localStorage entries found')
     }
   } catch (error) {
     console.error('❌ Error cleaning up localStorage:', error)
@@ -43,10 +40,7 @@ export function showLocalStorageStatus() {
       }
     }
     
-    console.log('📊 Current localStorage status:')
-    console.log(`Total twitchdle keys: ${twitchdleKeys.length}`)
     twitchdleKeys.forEach(key => {
-      console.log(`  - ${key}`)
     })
   } catch (error) {
     console.error('❌ Error showing localStorage status:', error)

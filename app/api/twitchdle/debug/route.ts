@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
     
-    console.log('🔍 DEBUG: Checking data for user:', session.user.id)
     
     // Verificar todos los juegos del usuario
     const gamesQuery = `SELECT * FROM "TwitchdleGame" WHERE "userId" = $1 ORDER BY "createdAt" DESC`
@@ -35,7 +34,6 @@ export async function GET(request: NextRequest) {
       scoresCount: scoresResult.rows.length
     }
     
-    console.log('🔍 DEBUG data:', debugData)
     
     return NextResponse.json(debugData)
   } catch (error) {

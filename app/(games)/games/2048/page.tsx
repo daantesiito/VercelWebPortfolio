@@ -61,12 +61,10 @@ export default async function Game2048Page() {
   let streamerScores: TopScore[] = [];
   
   try {
-    console.log('🔍 Fetching scores for 2048 game...');
     [topScores, streamerScores] = await Promise.all([
       getTopScores('2048', 100), // Obtener hasta 100 scores globales
       getTopStreamerScores('2048', 100) // Obtener hasta 100 scores de streamers
     ]);
-    console.log('✅ Scores fetched successfully:', { 
       topScoresCount: topScores.length, 
       streamerScoresCount: streamerScores.length 
     });

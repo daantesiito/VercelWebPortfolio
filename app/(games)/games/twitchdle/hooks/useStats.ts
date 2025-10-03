@@ -55,9 +55,6 @@ export function useLeaderboardLive(dateKey: string) {
       const currentData = queryClient.getQueryData(['leaderboard', 'streak', dateKey]) as any[]
       
       if (currentData && currentData.length > 0) {
-        console.log('🔄 Checking if server has updated data for optimistic users')
-        console.log('📊 Current optimistic data:', currentData.map(u => ({ userId: u.userId, displayName: u.displayName, value: u.value })))
-        console.log('📊 Server data:', serverData.map(u => ({ userId: u.userId, displayName: u.displayName, value: u.value })))
         
         // Crear un mapa de usuarios del servidor
         const serverUserMap = new Map(serverData.map(user => [user.userId, user]))
@@ -68,12 +65,10 @@ export function useLeaderboardLive(dateKey: string) {
         
         currentData.forEach(optimisticUser => {
           if (!optimisticUser.userId) {
-            console.log('⚠️ Optimistic user has no userId:', optimisticUser)
             return
           }
           
           const serverUser = serverUserMap.get(optimisticUser.userId)
-          console.log(`🔍 Checking user ${optimisticUser.displayName} (${optimisticUser.userId}):`, {
             foundInServer: !!serverUser,
             serverUser: serverUser ? { displayName: serverUser.displayName, value: serverUser.value } : null
           })
@@ -82,13 +77,11 @@ export function useLeaderboardLive(dateKey: string) {
             // Usuario no existe en servidor, mantener optimista
             mergedData.push(optimisticUser)
             hasOptimisticData = true
-            console.log('✅ Keeping optimistic user (not in server yet):', optimisticUser.displayName)
           } else {
             // Usuario existe en servidor, verificar si el servidor tiene datos más recientes
             const optimisticTime = new Date(optimisticUser.updatedAt || 0).getTime()
             const serverTime = Date.now() // Usar tiempo actual como fallback
             
-            console.log(`⏰ Time comparison for ${optimisticUser.displayName}:`, {
               optimisticTime: new Date(optimisticTime).toISOString(),
               serverTime: new Date(serverTime).toISOString(),
               optimisticIsNewer: optimisticTime > serverTime
@@ -100,11 +93,9 @@ export function useLeaderboardLive(dateKey: string) {
               if (index !== -1) {
                 mergedData[index] = optimisticUser
                 hasOptimisticData = true
-                console.log('✅ Keeping optimistic data (more recent):', optimisticUser.displayName)
               }
             } else {
               // Servidor tiene datos más recientes, usar servidor
-              console.log('✅ Using server data (more recent):', serverUser.displayName)
             }
           }
         })
@@ -125,7 +116,6 @@ export function useLeaderboardLive(dateKey: string) {
       }
       
       // Si no hay datos optimistas o el servidor tiene datos más recientes, usar servidor
-      console.log('🔄 Using server data directly')
       
       const sortedData = serverData.sort((a, b) => {
         const valueA = a.value || 0
@@ -197,7 +187,6 @@ export function bumpMyStreakOptimistic(
   userInfo?: { displayName?: string; twitchLogin?: string; avatarUrl?: string },
   bestStreak?: number
 ) {
-  console.log('🚀 Updating leaderboard optimistically:', { userId, userInfo, bestStreak })
   
   queryClient.setQueryData<any[]>(['leaderboard', 'streak', dateKey], (prev) => {
     if (!prev) return prev
@@ -212,7 +201,6 @@ export function bumpMyStreakOptimistic(
       const newValue = bestStreak || Math.max(me.value ?? 0, (me.value ?? 0) + 1)
       me.value = newValue
       me.updatedAt = new Date().toISOString()
-      console.log('✅ Updated existing user in leaderboard:', me)
     } else {
       // Usuario nuevo en el leaderboard
       const newEntry = {
@@ -224,7 +212,6 @@ export function bumpMyStreakOptimistic(
         updatedAt: new Date().toISOString()
       }
       copy.push(newEntry)
-      console.log('✅ Added new user to leaderboard:', newEntry)
     }
     
     // Reordenar por streak descendente, luego por orden de llegada (updatedAt ascendente)
@@ -239,7 +226,6 @@ export function bumpMyStreakOptimistic(
       return timeA - timeB // Ascendente: más antiguo primero
     })
     
-    console.log('📊 Updated leaderboard order:', copy.slice(0, 3))
     return copy
   })
 }

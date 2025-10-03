@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
     
-    console.log('⏰ Cron job ejecutándose: generate-daily-word')
     
     // Generar palabra para mañana
     const tomorrow = new Date()
