@@ -7,48 +7,33 @@ const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Daily-word API called')
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
     
+    console.log('🔍 Date parameter:', date)
+    
     if (!date) {
+      console.log('❌ No date provided')
       return NextResponse.json({ error: 'Fecha requerida' }, { status: 400 })
     }
     
-    // Verificar cache en memoria primero
-    const cached = wordCache.get(date)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      console.log('📦 Using cached word for date:', date)
-      return NextResponse.json({ 
-        success: true, 
-        date, 
-        word: cached.word 
-      }, {
-        headers: {
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=600', // 5min cache, 10min stale
-          'CDN-Cache-Control': 'max-age=3600', // 1 hora en CDN
-          'Vercel-CDN-Cache-Control': 'max-age=3600',
-        }
-      })
-    }
-    
+    console.log('🔍 About to call getDailyWord for date:', date)
     const word = await getDailyWord(date)
-    
-    // Guardar en cache
-    wordCache.set(date, { word, timestamp: Date.now() })
+    console.log('🔍 getDailyWord returned:', word)
     
     return NextResponse.json({ 
       success: true, 
       date, 
       word 
-    }, {
-      headers: {
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600', // 5min cache, 10min stale
-        'CDN-Cache-Control': 'max-age=3600', // 1 hora en CDN
-        'Vercel-CDN-Cache-Control': 'max-age=3600',
-      }
     })
   } catch (error) {
     console.error('❌ Error en daily-word API:', error)
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code,
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json({ 
       error: 'No se encontró palabra del día para esta fecha' 
     }, { status: 404 })
