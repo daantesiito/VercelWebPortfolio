@@ -4,23 +4,23 @@ import { getDailyWord } from '@/lib/twitchdle'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const date = searchParams.get('date') || '2025-10-03'
+    const date = searchParams.get('date')
     
-    console.log('🧪 Daily-word API called for date:', date)
+    if (!date) {
+      return NextResponse.json({ error: 'Fecha requerida' }, { status: 400 })
+    }
     
     const word = await getDailyWord(date)
     
     return NextResponse.json({ 
       success: true, 
       date, 
-      word,
-      message: 'Function executed successfully'
+      word 
     })
   } catch (error) {
-    console.error('❌ Daily-word API error:', error)
+    console.error('❌ Error en daily-word API:', error)
     return NextResponse.json({ 
-      error: 'Daily-word API failed',
-      details: error instanceof Error ? error.message : String(error)
-    }, { status: 500 })
+      error: 'No se encontró palabra del día para esta fecha' 
+    }, { status: 404 })
   }
 }

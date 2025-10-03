@@ -155,36 +155,19 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
 // Obtener la palabra del día desde la base de datos
 export async function getDailyWord(date: string): Promise<string> {
   try {
-    console.log('🔍 getDailyWord called for date:', date)
-    console.log('🔍 Environment:', process.env.NODE_ENV)
-    console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL)
-    console.log('🔍 Vercel deployment test - updated')
-    
     // Buscar la palabra en la base de datos usando SQL raw
-    console.log('🔍 About to execute SQL query for date:', date)
     const result = await query(`SELECT word FROM "DailyWord" WHERE date = $1 LIMIT 1`, [date])
-    
-    console.log('🔍 SQL query result:', { rowCount: result.rowCount, rows: result.rows })
     
     if (result.rows && result.rows.length > 0) {
       const word = result.rows[0].word
-      console.log('✅ Daily word found in DB:', { date, word })
-      console.log('🎯 PALABRA DEL DÍA:', word)
       return word
     }
     
     // Si no existe, generar automáticamente basado en la fecha
-    console.log('🔄 No word found, generating based on date...')
     const generatedWord = await generateDailyWordFromDate(date)
-    console.log('✅ Generated word for date:', { date, word: generatedWord })
     return generatedWord
   } catch (error) {
     console.error('❌ getDailyWord error:', error)
-    console.error('❌ Error details:', {
-      message: error instanceof Error ? error.message : String(error),
-      code: (error as any)?.code,
-      stack: error instanceof Error ? error.stack : undefined
-    })
     throw error
   }
 }
@@ -219,7 +202,6 @@ async function generateDailyWordFromDate(date: string): Promise<string> {
       DO UPDATE SET word = $2, "updatedAt" = NOW()
     `, [date, selectedWord])
     
-    console.log('🎲 Generated word from date:', { date, daysDiff, wordIndex, selectedWord })
     return selectedWord
   } catch (error) {
     console.error('❌ generateDailyWordFromDate error:', error)
@@ -244,7 +226,6 @@ export async function generateDailyWord(date: string, word?: string): Promise<st
       DO UPDATE SET word = $2, "updatedAt" = NOW()
     `, [date, word])
     
-    console.log('✅ Daily word set:', { date, word })
     return word
   } catch (error) {
     console.error('❌ generateDailyWord error:', error)
