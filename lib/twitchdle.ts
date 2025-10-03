@@ -158,6 +158,7 @@ export async function getDailyWord(date: string): Promise<string> {
     console.log('🔍 getDailyWord called for date:', date)
     console.log('🔍 Environment:', process.env.NODE_ENV)
     console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL)
+    console.log('🔍 Vercel deployment test - updated')
     
     // Buscar la palabra en la base de datos usando SQL raw temporalmente
     const result = await query(`SELECT word FROM "DailyWord" WHERE date = $1 LIMIT 1`, [date])
