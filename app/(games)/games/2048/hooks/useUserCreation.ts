@@ -14,13 +14,6 @@ export function useUserCreation() {
       
       if (user.twitchId && user.twitchLogin) {
         hasCreatedUser.current = true; // Marcar como ejecutado
-        
-          userId: user.id,
-          twitchId: user.twitchId,
-          twitchLogin: user.twitchLogin,
-          displayName: user.displayName,
-          avatarUrl: user.image
-        });
 
         // Crear/actualizar usuario en la base de datos
         fetch('/api/auth/create-user', {
@@ -39,7 +32,6 @@ export function useUserCreation() {
         .then(data => {
           if (data.success) {
           } else {
-            console.error('❌ Error creating user:', data.error);
             hasCreatedUser.current = false; // Reset si hay error
           }
         })

@@ -17,10 +17,7 @@ export function cleanupOldLocalStorage() {
     keysToRemove.forEach(key => {
       localStorage.removeItem(key)
     })
-    
-    if (keysToRemove.length > 0) {
-    } else {
-    }
+
   } catch (error) {
     console.error('❌ Error cleaning up localStorage:', error)
   }
@@ -40,8 +37,6 @@ export function showLocalStorageStatus() {
       }
     }
     
-    twitchdleKeys.forEach(key => {
-    })
   } catch (error) {
     console.error('❌ Error showing localStorage status:', error)
   }

@@ -69,9 +69,7 @@ export function useLeaderboardLive(dateKey: string) {
           }
           
           const serverUser = serverUserMap.get(optimisticUser.userId)
-            foundInServer: !!serverUser,
-            serverUser: serverUser ? { displayName: serverUser.displayName, value: serverUser.value } : null
-          })
+
           
           if (!serverUser) {
             // Usuario no existe en servidor, mantener optimista
@@ -82,11 +80,6 @@ export function useLeaderboardLive(dateKey: string) {
             const optimisticTime = new Date(optimisticUser.updatedAt || 0).getTime()
             const serverTime = Date.now() // Usar tiempo actual como fallback
             
-              optimisticTime: new Date(optimisticTime).toISOString(),
-              serverTime: new Date(serverTime).toISOString(),
-              optimisticIsNewer: optimisticTime > serverTime
-            })
-            
             if (optimisticTime > serverTime) {
               // Datos optimistas son más recientes, mantener optimista
               const index = mergedData.findIndex(u => u.userId === optimisticUser.userId)
@@ -94,8 +87,6 @@ export function useLeaderboardLive(dateKey: string) {
                 mergedData[index] = optimisticUser
                 hasOptimisticData = true
               }
-            } else {
-              // Servidor tiene datos más recientes, usar servidor
             }
           }
         })

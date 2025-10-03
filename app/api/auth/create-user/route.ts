@@ -14,13 +14,6 @@ export async function POST(request: NextRequest) {
 
     const { twitchId, twitchLogin, displayName, avatarUrl } = await request.json();
 
-      userId: session.user.id,
-      twitchId,
-      twitchLogin,
-      displayName,
-      avatarUrl
-    });
-
     // Crear o actualizar usuario usando SQL directo
     const user = await upsertUser({
       id: session.user.id,
@@ -32,7 +25,6 @@ export async function POST(request: NextRequest) {
       displayName: displayName,
       avatarUrl: avatarUrl,
     });
-
 
     // Actualizar información de streamer en background
     if (twitchId) {

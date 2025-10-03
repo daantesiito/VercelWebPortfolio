@@ -65,9 +65,6 @@ export default async function Game2048Page() {
       getTopScores('2048', 100), // Obtener hasta 100 scores globales
       getTopStreamerScores('2048', 100) // Obtener hasta 100 scores de streamers
     ]);
-      topScoresCount: topScores.length, 
-      streamerScoresCount: streamerScores.length 
-    });
   } catch (error) {
     console.error('❌ Error fetching scores:', error);
     // Continuar con arrays vacíos si hay error

@@ -92,18 +92,6 @@ export type GameResultPayload = {
 export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): TwitchdleStats {
   const next: TwitchdleStats = { ...prev };
 
-    gameDate: p.gameDate, 
-    won: p.won, 
-    attempts: p.attempts,
-    prevStats: {
-      totalGames: prev.totalGames,
-      victories: prev.victories,
-      currentStreak: prev.currentStreak,
-      maxStreak: prev.maxStreak,
-      lastWinDate: prev.lastWinDate
-    }
-  });
-
   // 1) totales
   next.totalGames = (prev.totalGames ?? 0) + 1;
   if (p.won) {
@@ -142,12 +130,6 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
     const prevMaxStreak = prev.maxStreak ?? 0;
     const newMaxStreak = Math.max(prevMaxStreak, next.currentStreak ?? 0);
     next.maxStreak = newMaxStreak;
-      prevMaxStreak,
-      currentStreak: next.currentStreak,
-      newMaxStreak,
-      gameDate: p.gameDate,
-      lastWinDate: prev.lastWinDate
-    });
   } else {
     next.maxStreak = prev.maxStreak ?? 0;
   }
@@ -167,14 +149,6 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
   next.lastGameWon = p.won;
   next.wordOfDay = p.wordOfDay;
   next.emojiGrid = p.emojiGrid ?? prev.emojiGrid;
-
-    totalGames: next.totalGames,
-    victories: next.victories,
-    successRate: next.successRate,
-    currentStreak: next.currentStreak,
-    maxStreak: next.maxStreak,
-    winDistribution: next.winDistribution
-  });
 
   return next;
 }
@@ -297,14 +271,6 @@ if (typeof window !== 'undefined') {
     const debugDate = getDebugDate(offsetDays);
     const stats = loadStatsLS();
     
-      totalGames: stats.totalGames,
-      victories: stats.victories,
-      currentStreak: stats.currentStreak,
-      maxStreak: stats.maxStreak,
-      lastWinDate: stats.lastWinDate,
-      lastGameDate: stats.lastGameDate
-    });
-    
     // Simular un juego ganado
     const payload = {
       gameDate: debugDate,
@@ -316,15 +282,7 @@ if (typeof window !== 'undefined') {
     
     const newStats = applyGameResult(stats, payload);
     saveStatsLS(newStats);
-    
-      totalGames: newStats.totalGames,
-      victories: newStats.victories,
-      currentStreak: newStats.currentStreak,
-      maxStreak: newStats.maxStreak,
-      lastWinDate: newStats.lastWinDate,
-      lastGameDate: newStats.lastGameDate
-    });
-    
+
     return newStats;
   };
   
@@ -333,14 +291,6 @@ if (typeof window !== 'undefined') {
     
     const debugDate = getDebugDate(offsetDays);
     const stats = loadStatsLS();
-    
-      totalGames: stats.totalGames,
-      victories: stats.victories,
-      currentStreak: stats.currentStreak,
-      maxStreak: stats.maxStreak,
-      lastWinDate: stats.lastWinDate,
-      lastGameDate: stats.lastGameDate
-    });
     
     // Simular un juego perdido
     const payload = {
@@ -353,14 +303,6 @@ if (typeof window !== 'undefined') {
     
     const newStats = applyGameResult(stats, payload);
     saveStatsLS(newStats);
-    
-      totalGames: newStats.totalGames,
-      victories: newStats.victories,
-      currentStreak: newStats.currentStreak,
-      maxStreak: newStats.maxStreak,
-      lastWinDate: newStats.lastWinDate,
-      lastGameDate: newStats.lastGameDate
-    });
     
     return newStats;
   };
@@ -386,45 +328,8 @@ if (typeof window !== 'undefined') {
     }
     
     const finalStats = loadStatsLS();
-      totalGames: finalStats.totalGames,
-      victories: finalStats.victories,
-      currentStreak: finalStats.currentStreak,
-      maxStreak: finalStats.maxStreak
-    });
     
     return finalStats;
-  };
-  
-  // Mostrar ayuda
-  (window as any).debugHelp = () => {
-🎯 TWITCHDLE DEBUG COMMANDS:
-
-simulateWin(offsetDays, attempts)  - Simular victoria
-  Ejemplo: simulateWin(0, 3)       - Ganar hoy en 3 intentos
-  Ejemplo: simulateWin(1, 5)       - Ganar mañana en 5 intentos
-
-simulateLoss(offsetDays)           - Simular derrota
-  Ejemplo: simulateLoss(0)         - Perder hoy
-
-simulateStreak(days)               - Simular racha de días consecutivos
-  Ejemplo: simulateStreak(3)       - Ganar 3 días seguidos
-
-showStats()                        - Ver estadísticas actuales
-resetStats()                       - Resetear estadísticas
-syncLeaderboard()                  - Sincronizar leaderboard con maxStreak actual
-
-getDebugDate(offsetDays)           - Ver qué fecha se usaría
-  Ejemplo: getDebugDate(1)         - Ver fecha de mañana
-
-📋 EJEMPLO DE USO:
-1. resetStats()                    - Empezar limpio
-2. simulateWin(0, 3)              - Ganar hoy en 3 intentos
-3. simulateWin(1, 2)              - Ganar mañana en 2 intentos
-4. simulateWin(2, 4)              - Ganar pasado mañana en 4 intentos
-5. showStats()                    - Ver racha = 3, maxStreak = 3
-6. simulateLoss(3)                - Perder el día siguiente
-7. showStats()                    - Ver racha = 0, maxStreak = 3
-    `);
   };
   
   // Función para sincronizar el leaderboard con el maxStreak actual
@@ -450,5 +355,4 @@ getDebugDate(offsetDays)           - Ver qué fecha se usaría
     }
   };
   
-  // Mostrar ayuda automáticamente
 }

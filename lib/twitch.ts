@@ -5,7 +5,6 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
   try {
     const clientId = process.env.TWITCH_CLIENT_ID
     if (!clientId) {
-      console.log('TWITCH_CLIENT_ID not set')
       return null
     }
 
@@ -18,7 +17,6 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
     })
 
     if (!userResponse.ok) {
-      console.log('Failed to fetch Twitch user info:', userResponse.status)
       return null
     }
 
@@ -26,7 +24,6 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
     const user = userData.data[0]
 
     if (!user) {
-      console.log('No user data found')
       return null
     }
 
@@ -44,9 +41,7 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
       if (followersResponse.ok) {
         const followersData = await followersResponse.json()
         followers = followersData.total || 0
-        console.log(`Fetched follower count for ${user.display_name}: ${followers}`)
       } else {
-        console.log('Failed to fetch follower count:', followersResponse.status, await followersResponse.text())
         
         // Fallback: try to get basic channel info
         try {
@@ -63,15 +58,12 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
             if (channel) {
               // Unfortunately, the channel endpoint doesn't include follower count
               // But we can at least get the display name
-              console.log(`Got channel info for ${channel.broadcaster_name}`)
             }
           }
         } catch (channelError) {
-          console.log('Error fetching channel info:', channelError)
         }
       }
     } catch (error) {
-      console.log('Error fetching follower count:', error)
     }
 
     return {
@@ -79,7 +71,6 @@ export async function getTwitchUserInfo(accessToken: string, twitchId: string): 
       displayName: user.display_name || user.login
     }
   } catch (error) {
-    console.log('Error fetching Twitch user info:', error)
     return null
   }
 }
@@ -96,7 +87,6 @@ export async function updateUserStreamerStatus(userId: string, accessToken: stri
     if (existingUser && existingUser.followers && existingUser.followers > 0 && existingUser.updatedAt) {
       const hoursSinceUpdate = (Date.now() - existingUser.updatedAt.getTime()) / (1000 * 60 * 60)
       if (hoursSinceUpdate < 24) {
-        console.log(`User ${userId} already has recent follower data (${existingUser.followers} followers), skipping update`)
         return
       }
     }
@@ -116,9 +106,7 @@ export async function updateUserStreamerStatus(userId: string, accessToken: stri
         },
       })
       
-      console.log(`User ${userId} updated: followers=${userInfo.followers}, isStreamer=${isStreamer}`)
     } else {
-      console.log(`User ${userId} - could not fetch follower data, keeping existing values`)
     }
   } catch (error) {
     console.log('Error updating streamer status:', error)

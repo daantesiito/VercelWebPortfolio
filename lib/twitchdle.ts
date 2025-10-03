@@ -33,7 +33,6 @@ export interface TwitchdleGameResponse {
 // Obtener el estado del juego del usuario para el día actual
 export async function getTwitchdleGame(userId: string, date: string): Promise<TwitchdleGameResponse | null> {
   try {
-    console.log('🔍 getTwitchdleGame called:', { userId, date })
     
     const game = await prisma.twitchdleGame.findUnique({
       where: {
@@ -45,18 +44,10 @@ export async function getTwitchdleGame(userId: string, date: string): Promise<Tw
     })
     
     if (!game) {
-      console.log('❌ No game found for user and date')
       return null
     }
     
     const board = JSON.parse(game.board)
-    
-    console.log('✅ Game found:', { 
-      id: game.id, 
-      gameFinished: game.gameFinished, 
-      won: game.won,
-      attempts: game.attempts 
-    })
     
     return {
       id: game.id,
@@ -79,13 +70,6 @@ export async function getTwitchdleGame(userId: string, date: string): Promise<Tw
 // Crear o actualizar el estado del juego
 export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promise<TwitchdleGameResponse | null> {
   try {
-    console.log('💾 upsertTwitchdleGame called:', { 
-      userId: gameState.userId, 
-      date: gameState.date,
-      gameFinished: gameState.gameFinished,
-      won: gameState.won,
-      attempts: gameState.attempts
-    })
     
     // Obtener la palabra del día automáticamente si no se proporciona
     let wordToGuess = gameState.wordToGuess
@@ -127,12 +111,6 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
     })
     
     const board = JSON.parse(game.board)
-    
-    console.log('✅ Game upserted successfully:', { 
-      id: game.id, 
-      gameFinished: game.gameFinished, 
-      won: game.won 
-    })
     
     return {
       id: game.id,
@@ -212,7 +190,6 @@ async function generateDailyWordFromDate(date: string): Promise<string> {
 // Generar palabra del día para una fecha específica
 export async function generateDailyWord(date: string, word?: string): Promise<string> {
   try {
-    console.log('🎲 generateDailyWord called for date:', date)
     
     if (!word) {
       throw new Error('Se debe proporcionar una palabra específica para generar la palabra del día')

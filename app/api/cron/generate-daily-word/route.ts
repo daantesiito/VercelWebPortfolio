@@ -9,8 +9,7 @@ export async function GET(request: NextRequest) {
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
-    
-    
+        
     // Generar palabra para mañana
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
