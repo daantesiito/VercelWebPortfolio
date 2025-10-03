@@ -9,6 +9,7 @@ import { useTwitchdleStats, generateEmojiGrid as generateEmojiGridFromStats, syn
 // Función para actualizar la tabla Score con el maxStreak
 async function updateScoreTable(userId: string, maxStreak: number) {
   try {
+    console.log('🔄 Updating Score table with maxStreak:', { userId, maxStreak })
     
     const response = await fetch('/api/scores', {
       method: 'POST',
@@ -20,6 +21,7 @@ async function updateScoreTable(userId: string, maxStreak: number) {
     })
     
     if (response.ok) {
+      console.log('✅ Score table updated successfully')
     } else {
       console.error('❌ Failed to update Score table:', response.status)
     }
@@ -200,7 +202,9 @@ function applyServerToLocal(server: GameResponse, setState: (updater: (s: GameSt
   setState(local => {
     if (!local) {
       // Primera carga: convertir respuesta del servidor
+      console.log('🔄 First load from server, converting board:', server.board)
       const committedBoard = convertBoardToCommitted(server.board, wordLength)
+      console.log('✅ Converted committedBoard:', committedBoard)
       const newState: GameState = {
         id: server.id,
         date: server.date,
@@ -224,6 +228,7 @@ function applyServerToLocal(server: GameResponse, setState: (updater: (s: GameSt
 
     // Si el servidor tiene un juego terminado, siempre priorizarlo
     if (server.gameFinished && !local.gameFinished) {
+      console.log('🎯 Server has finished game, prioritizing server data')
       const committedBoard = convertBoardToCommitted(server.board, wordLength)
       const serverState: GameState = {
         ...local,
@@ -252,6 +257,12 @@ function applyServerToLocal(server: GameResponse, setState: (updater: (s: GameSt
       (server.currentRow ?? 0) < (local.currentRow ?? 0)
 
     if (serverIsStale) {
+      console.log('🔄 Ignoring stale server data:', {
+        serverAttempts: server.attempts,
+        localAttempts: local.attempts,
+        serverCurrentRow: server.currentRow,
+        localCurrentRow: local.currentRow
+      })
       return local // Ignorar datos del servidor más viejos
     }
 
@@ -344,6 +355,12 @@ export function useTwitchdleGame() {
           (serverResponse.attempts ?? 0) >= (local.attempts ?? 0) &&
           (serverResponse.currentRow ?? 0) >= (local.currentRow ?? 0)
         if (!serverIsNewer) {
+          console.log('🔄 Ignoring stale server response in mutation:', {
+            serverAttempts: serverResponse.attempts,
+            localAttempts: local.attempts,
+            serverCurrentRow: serverResponse.currentRow,
+            localCurrentRow: local.currentRow
+          })
           return local
         }
         
@@ -372,6 +389,7 @@ export function useTwitchdleGame() {
   // Cargar el estado del juego
   const loadGame = useCallback(async (date?: string) => {
     if (!session?.user?.id) {
+      console.log('❌ No session or user ID available')
       return
     }
 
@@ -391,7 +409,9 @@ export function useTwitchdleGame() {
       const game: GameResponse | null = await response.json()
       
       if (!game) {
-        // No hay juego guardado, crear uno nuevo instantáneamente        
+        // No hay juego guardado, crear uno nuevo instantáneamente
+        console.log('🆕 Creando nuevo juego instantáneamente...')
+        
         // Cargar la palabra del día para obtener el largo
         const solution = await ensureDailyWord(currentDate, setGameState)
         const wordLength = solution.length
@@ -400,7 +420,9 @@ export function useTwitchdleGame() {
         const userStats = await loadUserStats(session.user.id)
         const currentStreak = userStats?.currentStreak || 0
         const maxStreak = userStats?.maxStreak || 0
-                
+        
+        console.log('📊 User stats loaded:', { currentStreak, maxStreak, userStats })
+        
         const initialState: GameState = {
           id: '',
           date: currentDate,
@@ -435,6 +457,7 @@ export function useTwitchdleGame() {
       applyServerToLocal(game, setGameState, game.board[0]?.length || 4, session.user.id)
       
       
+      console.log('✅ Game loaded from API:', game)
     } catch (err) {
       console.error('❌ Error loading game:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -454,6 +477,7 @@ export function useTwitchdleGame() {
   // Guardar el estado del juego (optimistic update)
   const saveGame = useCallback(async (newState: Partial<GameState>, guess?: string) => {
     if (!session?.user?.id || !gameState) {
+      console.log('❌ Cannot save game - no session or gameState')
       return
     }
 
@@ -507,6 +531,7 @@ export function useTwitchdleGame() {
         updatedAt: new Date().toISOString()
       } : null)
       
+      console.log('✅ Game saved to API:', updatedGame)
       return updatedGame
     } catch (err) {
       console.error('❌ Error saving game:', err)
@@ -527,10 +552,17 @@ export function useTwitchdleGame() {
   // Función para guardar el estado final del juego (para actualizar scores)
   const saveGameFinalState = useCallback(async (finalState: GameState) => {
     if (!session?.user?.id) {
+      console.log('❌ Cannot save final state - no session')
       return
     }
 
     try {
+      console.log('💾 Saving final game state for scores:', {
+        gameFinished: finalState.gameFinished,
+        won: finalState.won,
+        streak: finalState.streak
+      })
+
       const response = await fetch('/api/twitchdle/game', {
         method: 'POST',
         headers: {
@@ -553,7 +585,9 @@ export function useTwitchdleGame() {
         throw new Error('Error al guardar el estado final del juego')
       }
 
-      const result = await response.json()      
+      const result = await response.json()
+      console.log('✅ Final game state saved:', result)
+      
       
       return result
     } catch (err) {
@@ -625,6 +659,13 @@ export function useTwitchdleGame() {
       // Usar la racha máxima si se proporciona, sino usar la racha actual
       const streakToUse = bestStreak || gameState.streak
       
+      console.log('🎯 Triggering optimistic leaderboard update:', { 
+        userId: session.user.id, 
+        date: gameState.date,
+        currentStreak: gameState.streak,
+        bestStreak: streakToUse,
+        userInfo 
+      })
       bumpMyStreakOptimistic(session.user.id, gameState.date, userInfo, streakToUse)
     }
   }, [session?.user?.id, session?.user?.name, session?.user?.image])
@@ -648,6 +689,7 @@ export function useTwitchdleGame() {
     // Validar la palabra localmente (instantáneo)
     const validation = validateWord(guess)
     if (!validation.valid) {
+      console.log('❌ Invalid word:', validation.error)
       if (onError) {
         onError(validation.error || 'Palabra inválida')
       }
@@ -669,6 +711,15 @@ export function useTwitchdleGame() {
       const newStreak = gameFinished ? calculateStreak(s.streak, isCorrect, s.attempts === 0) : s.streak
       const newMaxStreak = isCorrect ? Math.max(newStreak, s.maxStreak) : s.maxStreak
 
+      console.log('🎯 Streak calculation:', {
+        currentStreak: s.streak,
+        isCorrect,
+        gameFinished,
+        newStreak,
+        newMaxStreak,
+        isFirstGame: s.attempts === 0
+      })
+
       const next: GameState = {
         ...s,
         committedBoard,
@@ -688,6 +739,11 @@ export function useTwitchdleGame() {
 
       // 2) Si el juego terminó, guardar el estado final para actualizar scores
       if (next.gameFinished) {
+        console.log('🎯 Game finished, saving final state:', {
+          won: next.won,
+          streak: next.streak,
+          attempts: next.attempts
+        })
         
         // Generar emoji grid para las estadísticas
         const emojiGrid = generateEmojiGridFromStats(next.committedBoard, next.attempts)
@@ -710,7 +766,9 @@ export function useTwitchdleGame() {
         // 3) Si ganó, ejecutar bump optimista del leaderboard
         if (next.won) {
           // Usar la racha máxima actualizada de las estadísticas locales
-          const leaderboardStreak = updatedStats.maxStreak          
+          const leaderboardStreak = updatedStats.maxStreak
+          console.log('🎯 Updating leaderboard with max streak:', leaderboardStreak)
+          
           triggerOptimisticBump(next, leaderboardStreak)
           
           // 4) Actualizar la tabla Score con el nuevo maxStreak

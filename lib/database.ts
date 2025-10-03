@@ -48,6 +48,7 @@ export async function getScores(gameSlug: string, limit: number = 10, streamersO
   queryText += ` ORDER BY s.value DESC LIMIT $2`
   
   const result = await query(queryText, [gameSlug, limit])
+  console.log('🔍 getScores result:', result.rows)
   return result.rows
 }
 
@@ -62,6 +63,13 @@ export async function upsertUser(userData: {
   displayName?: string | null
   avatarUrl?: string | null
 }) {
+  console.log('🔧 upsertUser called with data:', {
+    id: userData.id,
+    name: userData.name,
+    displayName: userData.displayName,
+    twitchLogin: userData.twitchLogin,
+    avatarUrl: userData.avatarUrl
+  })
 
   const queryText = `
     INSERT INTO "User" (
@@ -95,6 +103,7 @@ export async function upsertUser(userData: {
     false, // isStreamer
   ])
   
+  console.log('✅ upsertUser result:', result.rows[0])
   return result.rows[0]
 }
 
@@ -115,6 +124,7 @@ export async function upsertScore(userId: string, gameSlug: string, value: numbe
 
 // Función para obtener scores de racha (streak)
 export async function getStreakScores(gameSlug: string, limit: number = 10) {
+  console.log('🔍 getStreakScores called with:', { gameSlug, limit })
   
   const queryText = `
     SELECT 
@@ -130,5 +140,6 @@ export async function getStreakScores(gameSlug: string, limit: number = 10) {
   `
   
   const result = await query(queryText, [gameSlug, limit])
+  console.log('🔍 getStreakScores result:', result.rows)
   return result.rows
 }
