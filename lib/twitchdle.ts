@@ -35,22 +35,21 @@ export async function getTwitchdleGame(userId: string, date: string): Promise<Tw
   try {
     console.log('🔍 getTwitchdleGame called:', { userId, date })
     
-    const game = await prisma.twitchdleGame.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date,
-        },
-      },
-    })
+    // Usar SQL raw para evitar problemas de prepared statements en Vercel
+    const result = await query(`
+      SELECT * FROM "TwitchdleGame" 
+      WHERE "userId" = $1 AND "date" = $2
+      LIMIT 1
+    `, [userId, date])
     
-    console.log('🔍 Prisma query result:', game ? 'GAME FOUND' : 'NO GAME FOUND')
+    console.log('🔍 SQL query result:', result.rows && result.rows.length > 0 ? 'GAME FOUND' : 'NO GAME FOUND')
     
-    if (!game) {
+    if (!result.rows || result.rows.length === 0) {
       console.log('❌ No game found for user and date')
       return null
     }
     
+    const game = result.rows[0]
     const board = JSON.parse(game.board)
     
     console.log('✅ Game found:', { 
@@ -95,38 +94,43 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
       wordToGuess = await getDailyWord(gameState.date)
     }
     
-    const game = await prisma.twitchdleGame.upsert({
-      where: {
-        userId_date: {
-          userId: gameState.userId,
-          date: gameState.date,
-        },
-      },
-      update: {
-        board: JSON.stringify(gameState.board),
-        currentRow: gameState.currentRow,
-        currentCol: gameState.currentCol,
-        gameFinished: gameState.gameFinished,
-        won: gameState.won,
-        attempts: gameState.attempts,
-        streak: gameState.streak,
-        maxStreak: gameState.maxStreak,
-        wordToGuess: wordToGuess,
-      },
-      create: {
-        userId: gameState.userId,
-        date: gameState.date,
-        wordToGuess: wordToGuess,
-        board: JSON.stringify(gameState.board),
-        currentRow: gameState.currentRow,
-        currentCol: gameState.currentCol,
-        gameFinished: gameState.gameFinished,
-        won: gameState.won,
-        attempts: gameState.attempts,
-        streak: gameState.streak,
-        maxStreak: gameState.maxStreak,
-      },
-    })
+    // Usar SQL raw para evitar problemas de prepared statements en Vercel
+    const upsertResult = await query(`
+      INSERT INTO "TwitchdleGame" (
+        id, "userId", "date", "wordToGuess", board, "currentRow", "currentCol", 
+        "gameFinished", won, attempts, streak, "maxStreak", "createdAt", "updatedAt"
+      )
+      VALUES (
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW()
+      )
+      ON CONFLICT ("userId", "date")
+      DO UPDATE SET
+        board = $4,
+        "currentRow" = $5,
+        "currentCol" = $6,
+        "gameFinished" = $7,
+        won = $8,
+        attempts = $9,
+        streak = $10,
+        "maxStreak" = $11,
+        "wordToGuess" = $3,
+        "updatedAt" = NOW()
+      RETURNING *
+    `, [
+      gameState.userId,
+      gameState.date,
+      wordToGuess,
+      JSON.stringify(gameState.board),
+      gameState.currentRow,
+      gameState.currentCol,
+      gameState.gameFinished,
+      gameState.won,
+      gameState.attempts,
+      gameState.streak,
+      gameState.maxStreak
+    ])
+    
+    const game = upsertResult.rows[0]
     
     const board = JSON.parse(game.board)
     
