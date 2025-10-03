@@ -159,15 +159,13 @@ export async function getDailyWord(date: string): Promise<string> {
     console.log('🔍 Environment:', process.env.NODE_ENV)
     console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL)
     
-    // Buscar la palabra en la base de datos usando Prisma
-    const wordRecord = await prisma.word.findUnique({
-      where: { date }
-    })
+    // Buscar la palabra en la base de datos usando SQL raw temporalmente
+    const result = await query(`SELECT word FROM "DailyWord" WHERE date = $1 LIMIT 1`, [date])
     
-    console.log('🔍 Prisma query result:', wordRecord)
+    console.log('🔍 SQL query result:', { rowCount: result.rowCount, rows: result.rows })
     
-    if (wordRecord) {
-      const word = wordRecord.word
+    if (result.rows && result.rows.length > 0) {
+      const word = result.rows[0].word
       console.log('✅ Daily word found in DB:', { date, word })
       console.log('🎯 PALABRA DEL DÍA:', word)
       return word
@@ -181,9 +179,9 @@ export async function getDailyWord(date: string): Promise<string> {
   } catch (error) {
     console.error('❌ getDailyWord error:', error)
     console.error('❌ Error details:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack
+      message: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code,
+      stack: error instanceof Error ? error.stack : undefined
     })
     throw error
   }
@@ -198,25 +196,26 @@ async function generateDailyWordFromDate(date: string): Promise<string> {
     const daysDiff = Math.floor((currentDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24))
     
     // Obtener todas las palabras ordenadas por fecha de creación
-    const allWords = await prisma.word.findMany({
-      orderBy: { createdAt: 'asc' },
-      select: { word: true }
-    })
+    const allWordsResult = await query(`
+      SELECT word FROM "DailyWord" 
+      ORDER BY "createdAt" ASC
+    `)
     
-    if (!allWords || allWords.length === 0) {
+    if (!allWordsResult.rows || allWordsResult.rows.length === 0) {
       throw new Error('No hay palabras disponibles en la base de datos')
     }
     
-    const wordList = allWords.map(record => record.word)
+    const wordList = allWordsResult.rows.map(row => row.word)
     const wordIndex = daysDiff % wordList.length
     const selectedWord = wordList[wordIndex]
     
     // Guardar la palabra seleccionada para esta fecha
-    await prisma.word.upsert({
-      where: { date },
-      update: { word: selectedWord },
-      create: { date, word: selectedWord }
-    })
+    await query(`
+      INSERT INTO "DailyWord" (id, date, word, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())
+      ON CONFLICT (date) 
+      DO UPDATE SET word = $2, "updatedAt" = NOW()
+    `, [date, selectedWord])
     
     console.log('🎲 Generated word from date:', { date, daysDiff, wordIndex, selectedWord })
     return selectedWord
@@ -235,12 +234,13 @@ export async function generateDailyWord(date: string, word?: string): Promise<st
       throw new Error('Se debe proporcionar una palabra específica para generar la palabra del día')
     }
     
-    // Usar Prisma para insertar/actualizar
-    await prisma.word.upsert({
-      where: { date },
-      update: { word },
-      create: { date, word }
-    })
+    // Usar SQL raw para insertar/actualizar
+    await query(`
+      INSERT INTO "DailyWord" (id, date, word, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())
+      ON CONFLICT (date) 
+      DO UPDATE SET word = $2, "updatedAt" = NOW()
+    `, [date, word])
     
     console.log('✅ Daily word set:', { date, word })
     return word
