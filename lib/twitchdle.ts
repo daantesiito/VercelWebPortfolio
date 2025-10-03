@@ -33,7 +33,7 @@ export interface TwitchdleGameResponse {
 // Obtener el estado del juego del usuario para el día actual
 export async function getTwitchdleGame(userId: string, date: string): Promise<TwitchdleGameResponse | null> {
   try {
-    console.log('🔍 getTwitchdleGame called:', { userId, date })
+    //console.log('🔍 getTwitchdleGame called:', { userId, date })
     
     // Usar SQL raw para evitar problemas de prepared statements en Vercel
     const result = await query(`
@@ -42,22 +42,22 @@ export async function getTwitchdleGame(userId: string, date: string): Promise<Tw
       LIMIT 1
     `, [userId, date])
     
-    console.log('🔍 SQL query result:', result.rows && result.rows.length > 0 ? 'GAME FOUND' : 'NO GAME FOUND')
+    //console.log('🔍 SQL query result:', result.rows && result.rows.length > 0 ? 'GAME FOUND' : 'NO GAME FOUND')
     
     if (!result.rows || result.rows.length === 0) {
-      console.log('❌ No game found for user and date')
+      //console.log('❌ No game found for user and date')
       return null
     }
     
     const game = result.rows[0]
     const board = JSON.parse(game.board)
     
-    console.log('✅ Game found:', { 
-      id: game.id, 
-      gameFinished: game.gameFinished, 
-      won: game.won,
-      attempts: game.attempts 
-    })
+    //console.log('✅ Game found:', { 
+      //id: game.id, 
+      //gameFinished: game.gameFinished, 
+      //won: game.won,
+      //attempts: game.attempts 
+    //})
     
     return {
       id: game.id,
@@ -80,13 +80,13 @@ export async function getTwitchdleGame(userId: string, date: string): Promise<Tw
 // Crear o actualizar el estado del juego
 export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promise<TwitchdleGameResponse | null> {
   try {
-    console.log('💾 upsertTwitchdleGame called:', { 
-      userId: gameState.userId, 
-      date: gameState.date,
-      gameFinished: gameState.gameFinished,
-      won: gameState.won,
-      attempts: gameState.attempts
-    })
+    //console.log('💾 upsertTwitchdleGame called:', { 
+      //userId: gameState.userId, 
+      //date: gameState.date,
+      //gameFinished: gameState.gameFinished,
+      //won: gameState.won,
+      //attempts: gameState.attempts
+    //})
     
     // Obtener la palabra del día automáticamente si no se proporciona
     let wordToGuess = gameState.wordToGuess
@@ -134,11 +134,11 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
     
     const board = JSON.parse(game.board)
     
-    console.log('✅ Game upserted successfully:', { 
-      id: game.id, 
-      gameFinished: game.gameFinished, 
-      won: game.won 
-    })
+    //console.log('✅ Game upserted successfully:', { 
+      //id: game.id, 
+      //gameFinished: game.gameFinished, 
+      //won: game.won 
+    //})
     
     return {
       id: game.id,
@@ -218,7 +218,7 @@ async function generateDailyWordFromDate(date: string): Promise<string> {
 // Generar palabra del día para una fecha específica
 export async function generateDailyWord(date: string, word?: string): Promise<string> {
   try {
-    console.log('🎲 generateDailyWord called for date:', date)
+    //console.log('🎲 generateDailyWord called for date:', date)
     
     if (!word) {
       throw new Error('Se debe proporcionar una palabra específica para generar la palabra del día')
