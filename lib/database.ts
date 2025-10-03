@@ -15,12 +15,21 @@ const pool = new Pool({
 
 // Función para ejecutar queries SQL directamente
 export async function query(text: string, params?: any[]) {
+  console.log('🔍 Database query:', { text, params })
+  console.log('🔍 Pool status:', { totalCount: pool.totalCount, idleCount: pool.idleCount, waitingCount: pool.waitingCount })
+  
   const client = await pool.connect()
   try {
+    console.log('🔍 Client connected, executing query...')
     const result = await client.query(text, params)
+    console.log('🔍 Query executed successfully:', { rowCount: result.rowCount })
     return result
+  } catch (error) {
+    console.error('❌ Database query error:', error)
+    throw error
   } finally {
     client.release()
+    console.log('🔍 Client released')
   }
 }
 

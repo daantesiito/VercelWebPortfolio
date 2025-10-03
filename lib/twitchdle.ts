@@ -156,9 +156,13 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
 export async function getDailyWord(date: string): Promise<string> {
   try {
     console.log('🔍 getDailyWord called for date:', date)
+    console.log('🔍 Environment:', process.env.NODE_ENV)
+    console.log('🔍 Database URL exists:', !!process.env.DATABASE_URL)
     
     // Buscar la palabra en la base de datos usando SQL raw
     const result = await query(`SELECT word FROM "DailyWord" WHERE date = $1 LIMIT 1`, [date])
+    
+    console.log('🔍 Query result:', { rowCount: result.rowCount, rows: result.rows })
     
     if (result.rows && result.rows.length > 0) {
       const word = result.rows[0].word
@@ -174,6 +178,11 @@ export async function getDailyWord(date: string): Promise<string> {
     return generatedWord
   } catch (error) {
     console.error('❌ getDailyWord error:', error)
+    console.error('❌ Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    })
     throw error
   }
 }
