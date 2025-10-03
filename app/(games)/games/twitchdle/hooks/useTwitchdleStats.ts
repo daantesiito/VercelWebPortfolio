@@ -43,9 +43,9 @@ export function loadStatsLS(): TwitchdleStats {
 export function saveStatsLS(stats: TwitchdleStats) {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(stats));
-    console.log('💾 Stats saved to localStorage:', stats);
+    //console.log('💾 Stats saved to localStorage:', stats);
   } catch (error) {
-    console.warn('⚠️ Could not save stats to localStorage:', error);
+    //console.warn('⚠️ Could not save stats to localStorage:', error);
   }
 }
 
@@ -93,18 +93,18 @@ export type GameResultPayload = {
 export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): TwitchdleStats {
   const next: TwitchdleStats = { ...prev };
 
-  console.log('📊 Applying game result:', { 
-    gameDate: p.gameDate, 
-    won: p.won, 
-    attempts: p.attempts,
-    prevStats: {
-      totalGames: prev.totalGames,
-      victories: prev.victories,
-      currentStreak: prev.currentStreak,
-      maxStreak: prev.maxStreak,
-      lastWinDate: prev.lastWinDate
-    }
-  });
+  //console.log('📊 Applying game result:', { 
+    //gameDate: p.gameDate, 
+    //won: p.won, 
+    //attempts: p.attempts,
+    //prevStats: {
+      //totalGames: prev.totalGames,
+      //victories: prev.victories,
+      //currentStreak: prev.currentStreak,
+      //maxStreak: prev.maxStreak,
+      //lastWinDate: prev.lastWinDate
+    //}
+  //});
 
   // 1) totales
   next.totalGames = (prev.totalGames ?? 0) + 1;
@@ -119,16 +119,16 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
       if (p.gameDate === prev.lastWinDate) {
         // mismo día: NO sumamos a racha (pero sí a totales y dist)
         next.currentStreak = prev.currentStreak;
-        console.log('📊 Same day win - streak unchanged:', next.currentStreak);
+        //console.log('📊 Same day win - streak unchanged:', next.currentStreak);
       } else {
         const diff = daysDiff(p.gameDate, prev.lastWinDate);
         if (diff === 1) {
           next.currentStreak = prev.currentStreak + 1;
-          console.log('📊 Consecutive day win - streak increased:', next.currentStreak);
+          //console.log('📊 Consecutive day win - streak increased:', next.currentStreak);
         } else {
           // saltó días: racha se resetea y este win arranca en 1
           next.currentStreak = 1;
-          console.log('📊 Skipped days - streak reset to 1');
+          //console.log('📊 Skipped days - streak reset to 1');
         }
         next.lastWinDate = p.gameDate;
       }
@@ -136,12 +136,12 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
       // primer win
       next.currentStreak = 1;
       next.lastWinDate = p.gameDate;
-      console.log('📊 First win - streak set to 1');
+      //console.log('📊 First win - streak set to 1');
     }
   } else {
     // pierde => racha a 0, no tocamos lastWinDate
     next.currentStreak = 0;
-    console.log('📊 Loss - streak reset to 0');
+    //console.log('📊 Loss - streak reset to 0');
   }
 
   // 3) mejor racha
@@ -149,13 +149,13 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
     const prevMaxStreak = prev.maxStreak ?? 0;
     const newMaxStreak = Math.max(prevMaxStreak, next.currentStreak ?? 0);
     next.maxStreak = newMaxStreak;
-    console.log('📊 Max streak calculation:', {
-      prevMaxStreak,
-      currentStreak: next.currentStreak,
-      newMaxStreak,
-      gameDate: p.gameDate,
-      lastWinDate: prev.lastWinDate
-    });
+    //console.log('📊 Max streak calculation:', {
+      //prevMaxStreak,
+      //currentStreak: next.currentStreak,
+      //newMaxStreak,
+      //gameDate: p.gameDate,
+      //lastWinDate: prev.lastWinDate
+    //});
   } else {
     next.maxStreak = prev.maxStreak ?? 0;
   }
@@ -166,7 +166,7 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
     const dist = [...(prev.winDistribution ?? [0,0,0,0,0,0])] as GuessDist;
     dist[idx] = (dist[idx] ?? 0) + 1;
     next.winDistribution = dist;
-    console.log(`📊 Win distribution updated - index ${idx}:`, dist[idx]);
+    //console.log(`📊 Win distribution updated - index ${idx}:`, dist[idx]);
   } else {
     next.winDistribution = prev.winDistribution ?? [0,0,0,0,0,0];
   }
@@ -177,14 +177,14 @@ export function applyGameResult(prev: TwitchdleStats, p: GameResultPayload): Twi
   next.wordOfDay = p.wordOfDay;
   next.emojiGrid = p.emojiGrid ?? prev.emojiGrid;
 
-  console.log('📊 Final stats:', {
-    totalGames: next.totalGames,
-    victories: next.victories,
-    successRate: next.successRate,
-    currentStreak: next.currentStreak,
-    maxStreak: next.maxStreak,
-    winDistribution: next.winDistribution
-  });
+  //console.log('📊 Final stats:', {
+    //totalGames: next.totalGames,
+    //victories: next.victories,
+    //successRate: next.successRate,
+    //currentStreak: next.currentStreak,
+    //maxStreak: next.maxStreak,
+    //winDistribution: next.winDistribution
+  //});
 
   return next;
 }
@@ -230,7 +230,7 @@ export const useTwitchdleStats = () => {
   }, [])
   
   const updateStats = (attempts: number, won: boolean, emojiGrid: string, gameDate: string, wordOfDay: string) => {
-    console.log('📊 Updating stats:', { attempts, won, gameDate, wordOfDay })
+    //console.log('📊 Updating stats:', { attempts, won, gameDate, wordOfDay })
     
     const payload: GameResultPayload = {
       gameDate,
@@ -269,7 +269,7 @@ export const useTwitchdleStats = () => {
 // Función para sincronizar con el servidor
 export async function syncStatsToServer(stats: TwitchdleStats & { userId: string; gameDate: string; processedAt: string }) {
   try {
-    console.log('🔄 Syncing stats to server:', { userId: stats.userId, gameDate: stats.gameDate })
+    //console.log('🔄 Syncing stats to server:', { userId: stats.userId, gameDate: stats.gameDate })
     const response = await fetch('/api/twitchdle/stats', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -281,7 +281,7 @@ export async function syncStatsToServer(stats: TwitchdleStats & { userId: string
     }
     
     const result = await response.json()
-    console.log('✅ Stats synced to server:', result)
+    //console.log('✅ Stats synced to server:', result)
     return result
   } catch (error) {
     console.error('❌ Error syncing stats to server:', error)
@@ -306,19 +306,19 @@ export function getDebugDate(offsetDays: number = 0): string {
 if (typeof window !== 'undefined') {
   // Función para simular un juego ganado con fecha específica
   (window as any).simulateWin = (offsetDays: number, attempts: number = 3) => {
-    console.log('🎯 DEBUG: Simulating win with date offset:', offsetDays, 'attempts:', attempts);
+    //console.log('🎯 DEBUG: Simulating win with date offset:', offsetDays, 'attempts:', attempts);
     
     const debugDate = getDebugDate(offsetDays);
     const stats = loadStatsLS();
     
-    console.log('📊 Current stats before simulation:', {
-      totalGames: stats.totalGames,
-      victories: stats.victories,
-      currentStreak: stats.currentStreak,
-      maxStreak: stats.maxStreak,
-      lastWinDate: stats.lastWinDate,
-      lastGameDate: stats.lastGameDate
-    });
+    //console.log('📊 Current stats before simulation:', {
+      //totalGames: stats.totalGames,
+      //victories: stats.victories,
+      //currentStreak: stats.currentStreak,
+      //maxStreak: stats.maxStreak,
+      //lastWinDate: stats.lastWinDate,
+      //lastGameDate: stats.lastGameDate
+    //});
     
     // Simular un juego ganado
     const payload = {
@@ -332,34 +332,34 @@ if (typeof window !== 'undefined') {
     const newStats = applyGameResult(stats, payload);
     saveStatsLS(newStats);
     
-    console.log('📊 New stats after simulation:', {
-      totalGames: newStats.totalGames,
-      victories: newStats.victories,
-      currentStreak: newStats.currentStreak,
-      maxStreak: newStats.maxStreak,
-      lastWinDate: newStats.lastWinDate,
-      lastGameDate: newStats.lastGameDate
-    });
+    //console.log('📊 New stats after simulation:', {
+      //totalGames: newStats.totalGames,
+      //victories: newStats.victories,
+      //currentStreak: newStats.currentStreak,
+      //maxStreak: newStats.maxStreak,
+      //lastWinDate: newStats.lastWinDate,
+      //lastGameDate: newStats.lastGameDate
+    //});
     
-    console.log('🎯 DEBUG: Reload the page to see updated stats');
+    //console.log('🎯 DEBUG: Reload the page to see updated stats');
     return newStats;
   };
   
   // Función para simular un juego perdido
   (window as any).simulateLoss = (offsetDays: number) => {
-    console.log('🎯 DEBUG: Simulating loss with date offset:', offsetDays);
+    //console.log('🎯 DEBUG: Simulating loss with date offset:', offsetDays);
     
     const debugDate = getDebugDate(offsetDays);
     const stats = loadStatsLS();
     
-    console.log('📊 Current stats before simulation:', {
-      totalGames: stats.totalGames,
-      victories: stats.victories,
-      currentStreak: stats.currentStreak,
-      maxStreak: stats.maxStreak,
-      lastWinDate: stats.lastWinDate,
-      lastGameDate: stats.lastGameDate
-    });
+    //console.log('📊 Current stats before simulation:', {
+      //totalGames: stats.totalGames,
+      //victories: stats.victories,
+      //currentStreak: stats.currentStreak,
+      //maxStreak: stats.maxStreak,
+      //lastWinDate: stats.lastWinDate,
+      //lastGameDate: stats.lastGameDate
+    //});
     
     // Simular un juego perdido
     const payload = {
@@ -373,23 +373,23 @@ if (typeof window !== 'undefined') {
     const newStats = applyGameResult(stats, payload);
     saveStatsLS(newStats);
     
-    console.log('📊 New stats after simulation:', {
-      totalGames: newStats.totalGames,
-      victories: newStats.victories,
-      currentStreak: newStats.currentStreak,
-      maxStreak: newStats.maxStreak,
-      lastWinDate: newStats.lastWinDate,
-      lastGameDate: newStats.lastGameDate
-    });
+    //console.log('📊 New stats after simulation:', {
+      //totalGames: newStats.totalGames,
+      //victories: newStats.victories,
+      //currentStreak: newStats.currentStreak,
+      //maxStreak: newStats.maxStreak,
+      //lastWinDate: newStats.lastWinDate,
+      //lastGameDate: newStats.lastGameDate
+    //});
     
-    console.log('🎯 DEBUG: Reload the page to see updated stats');
+    //console.log('🎯 DEBUG: Reload the page to see updated stats');
     return newStats;
   };
   
   // Función para ver las estadísticas actuales
   (window as any).showStats = () => {
     const stats = loadStatsLS();
-    console.log('📊 Current stats:', stats);
+    //console.log('📊 Current stats:', stats);
     return stats;
   };
   
@@ -397,67 +397,34 @@ if (typeof window !== 'undefined') {
   (window as any).resetStats = () => {
     const blank = blankStats();
     saveStatsLS(blank);
-    console.log('🔄 Stats reset to blank');
+    //console.log('🔄 Stats reset to blank');
     return blank;
   };
   
   // Función para simular una secuencia de días
   (window as any).simulateStreak = (days: number) => {
-    console.log(`🎯 DEBUG: Simulating ${days} consecutive wins`);
+    //console.log(`🎯 DEBUG: Simulating ${days} consecutive wins`);
     
     for (let i = 0; i < days; i++) {
-      console.log(`\n--- Day ${i + 1} ---`);
+      //console.log(`\n--- Day ${i + 1} ---`);
       (window as any).simulateWin(i, Math.floor(Math.random() * 6) + 1);
     }
     
     const finalStats = loadStatsLS();
-    console.log('\n🏆 Final streak simulation results:', {
-      totalGames: finalStats.totalGames,
-      victories: finalStats.victories,
-      currentStreak: finalStats.currentStreak,
-      maxStreak: finalStats.maxStreak
-    });
+    //console.log('\n🏆 Final streak simulation results:', {
+      //totalGames: finalStats.totalGames,
+      //victories: finalStats.victories,
+      //currentStreak: finalStats.currentStreak,
+      //maxStreak: finalStats.maxStreak
+    //});
     
     return finalStats;
-  };
-  
-  // Mostrar ayuda
-  (window as any).debugHelp = () => {
-    console.log(`
-🎯 TWITCHDLE DEBUG COMMANDS:
-
-simulateWin(offsetDays, attempts)  - Simular victoria
-  Ejemplo: simulateWin(0, 3)       - Ganar hoy en 3 intentos
-  Ejemplo: simulateWin(1, 5)       - Ganar mañana en 5 intentos
-
-simulateLoss(offsetDays)           - Simular derrota
-  Ejemplo: simulateLoss(0)         - Perder hoy
-
-simulateStreak(days)               - Simular racha de días consecutivos
-  Ejemplo: simulateStreak(3)       - Ganar 3 días seguidos
-
-showStats()                        - Ver estadísticas actuales
-resetStats()                       - Resetear estadísticas
-syncLeaderboard()                  - Sincronizar leaderboard con maxStreak actual
-
-getDebugDate(offsetDays)           - Ver qué fecha se usaría
-  Ejemplo: getDebugDate(1)         - Ver fecha de mañana
-
-📋 EJEMPLO DE USO:
-1. resetStats()                    - Empezar limpio
-2. simulateWin(0, 3)              - Ganar hoy en 3 intentos
-3. simulateWin(1, 2)              - Ganar mañana en 2 intentos
-4. simulateWin(2, 4)              - Ganar pasado mañana en 4 intentos
-5. showStats()                    - Ver racha = 3, maxStreak = 3
-6. simulateLoss(3)                - Perder el día siguiente
-7. showStats()                    - Ver racha = 0, maxStreak = 3
-    `);
   };
   
   // Función para sincronizar el leaderboard con el maxStreak actual
   (window as any).syncLeaderboard = async () => {
     const stats = loadStatsLS();
-    console.log('🔄 Syncing leaderboard with current maxStreak:', stats.maxStreak);
+    //console.log('🔄 Syncing leaderboard with current maxStreak:', stats.maxStreak);
     
     try {
       const response = await fetch('/api/scores', {
@@ -470,7 +437,7 @@ getDebugDate(offsetDays)           - Ver qué fecha se usaría
       });
       
       if (response.ok) {
-        console.log('✅ Leaderboard synced successfully');
+        //console.log('✅ Leaderboard synced successfully');
       } else {
         console.error('❌ Failed to sync leaderboard:', response.status);
       }
@@ -480,5 +447,5 @@ getDebugDate(offsetDays)           - Ver qué fecha se usaría
   };
   
   // Mostrar ayuda automáticamente
-  console.log('🎯 Twitchdle Debug Tools loaded! Type debugHelp() for commands');
+  //console.log('🎯 Twitchdle Debug Tools loaded! Type debugHelp() for commands');
 }

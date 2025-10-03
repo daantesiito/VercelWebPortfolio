@@ -15,23 +15,23 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0] // YYYY-MM-DD
     
-    console.log('🔍 GET /api/twitchdle/game:', { userId: session.user.id, date })
+    //console.log('🔍 GET /api/twitchdle/game:', { userId: session.user.id, date })
     
     const game = await getTwitchdleGame(session.user.id, date)
     
-    console.log('🔍 Game result from DB:', game ? 'FOUND' : 'NOT FOUND')
+    //console.log('🔍 Game result from DB:', game ? 'FOUND' : 'NOT FOUND')
     
     if (!game) {
       // Si no hay juego, devolver null para que el frontend muestre tablero vacío
-      console.log('🔍 Returning null - no game found')
+      //console.log('🔍 Returning null - no game found')
       return NextResponse.json(null)
     }
     
-    console.log('🔍 Returning game data:', { 
-      gameFinished: game.gameFinished, 
-      won: game.won, 
-      attempts: game.attempts 
-    })
+    //console.log('🔍 Returning game data:', { 
+      //gameFinished: game.gameFinished, 
+      //won: game.won, 
+      //attempts: game.attempts 
+    //})
     
     return NextResponse.json(game)
   } catch (error) {
@@ -63,14 +63,14 @@ export async function POST(request: NextRequest) {
       guess // Palabra que el usuario está intentando adivinar
     } = body
     
-    console.log('💾 POST /api/twitchdle/game:', { 
-      userId: session.user.id, 
-      date, 
-      gameFinished, 
-      won, 
-      attempts,
-      guess 
-    })
+    //console.log('💾 POST /api/twitchdle/game:', { 
+      //userId: session.user.id, 
+      //date, 
+      //gameFinished, 
+      //won, 
+      //attempts,
+      //guess 
+    //})
     
     // Validar que la fecha sea válida
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
