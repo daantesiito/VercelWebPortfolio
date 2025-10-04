@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { bumpMyStreakOptimistic } from './useStats'
 import { useTwitchdleStats, generateEmojiGrid as generateEmojiGridFromStats, syncStatsToServer } from './useTwitchdleStats'
+import { gameDateString } from '../lib/gameDay'
 
 // Bootstrap eliminado - solo BD
 
@@ -397,7 +398,7 @@ export function useTwitchdleGame() {
       setLoading(true)
       setError(null)
       
-      const currentDate = date || new Date().toISOString().split('T')[0]
+      const currentDate = date || gameDateString()
       
       // Cargar solo desde BD - sin localStorage
       const response = await fetch(`/api/twitchdle/game?date=${currentDate}`)
@@ -482,7 +483,7 @@ export function useTwitchdleGame() {
     }
 
     try {
-      const currentDate = new Date().toISOString().split('T')[0]
+      const currentDate = gameDateString()
       
       // Crear el snapshot para enviar a la API (sin draft)
       const snapshotToSend = {
@@ -795,7 +796,7 @@ export function useTwitchdleGame() {
   useEffect(() => {
     if (!session?.user?.id) return
     
-    const currentDate = new Date().toISOString().split('T')[0]
+    const currentDate = gameDateString()
     
     // Cargar solo desde BD - sin bootstrap ni localStorage
     loadGame()

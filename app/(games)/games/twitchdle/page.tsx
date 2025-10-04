@@ -6,6 +6,7 @@ import AuthButton from '@/components/AuthButton';
 import ClientProviders from './ClientProviders';
 import './styles.css';
 import Head from 'next/head';
+import { gameDateString } from './lib/gameDay';
 
 // Forzar Node.js runtime para Prisma
 export const runtime = 'nodejs';
@@ -28,11 +29,11 @@ export default async function TwitchdlePage() {
   let streakScores: TopScore[] = [];
   
   try {
-    console.log('🔍 Fetching streak scores for Twitchdle...');
+    //console.log('🔍 Fetching streak scores for Twitchdle...');
     streakScores = await getTopStreakScores('twitchdle', 100);
-    console.log('✅ Streak scores fetched successfully:', { 
-      streakScoresCount: streakScores.length 
-    });
+    //console.log('✅ Streak scores fetched successfully:', { 
+      //streakScoresCount: streakScores.length 
+    //});
   } catch (error) {
     console.error('❌ Error fetching streak scores:', error);
     // Continuar con array vacío si hay error
@@ -56,7 +57,7 @@ export default async function TwitchdlePage() {
     );
   }
 
-  const currentDate = new Date().toISOString().split('T')[0];
+  const currentDate = gameDateString();
   const userId = session.user.id;
 
   return (

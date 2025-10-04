@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react'
+import { gameDateString } from '../lib/gameDay'
 
 type GuessDist = [number, number, number, number, number, number];
 
@@ -299,7 +300,7 @@ export function getDebugDate(offsetDays: number = 0): string {
   const today = new Date();
   const debugDate = new Date(today);
   debugDate.setDate(today.getDate() + offsetDays);
-  return debugDate.toISOString().split('T')[0]; // YYYY-MM-DD
+  return gameDateString(debugDate); // YYYY-MM-DD en zona horaria de BA
 }
 
 // Función global para debug desde la consola

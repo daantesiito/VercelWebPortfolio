@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/database'
+import { gameDateString } from '@/app/(games)/games/twitchdle/lib/gameDay'
 
 // Fijar runtime a nodejs para Prisma
 export const runtime = 'nodejs'
 
 // Validador simple de YYYY-MM-DD
-function isYyyyMmDd(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s)
+function isYyyyMmDd(s?: string | null): boolean {
+  return !!s && /^\d{4}-\d{2}-\d{2}$/.test(s)
 }
 
 // Construir ETag para cache
@@ -17,18 +18,12 @@ function makeEtag(date: string, word?: string): string {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const date = searchParams.get('date')?.trim()
+    // Si no mandan ?date, usamos la fecha BA de "ahora"
+    const date = isYyyyMmDd(searchParams.get('date'))
+      ? (searchParams.get('date') as string)
+      : gameDateString()
     
     console.log('🔍 GET /api/twitchdle/daily-word:', { date })
-    
-    // Validar parámetro date
-    if (!date || !isYyyyMmDd(date)) {
-      console.log('❌ Invalid date format:', date)
-      return NextResponse.json(
-        { error: 'Invalid or missing "date". Expected YYYY-MM-DD.' },
-        { status: 400 }
-      )
-    }
     
     // Buscar en la base de datos usando SQL raw
     const result = await query(
