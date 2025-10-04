@@ -31,18 +31,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    //console.log('🔍 API /api/scores called with:', { game, limit, streamersOnly, streakOnly })
+    
     let scores
     if (streakOnly) {
+      //console.log('🔍 Using getTopStreakScores with limit:', limit)
       scores = await getTopStreakScores(game, limit)
     } else if (streamersOnly) {
+      //console.log('🔍 Using getTopStreamerScores with limit:', limit)
       scores = await getTopStreamerScores(game, limit)
     } else {
+      //console.log('🔍 Using getTopScores with limit:', limit)
       scores = await getTopScores(game, limit)
     }
     
     return NextResponse.json(scores)
   } catch (error) {
-    console.error('Error fetching scores:', error)
+    //console.error('Error fetching scores:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

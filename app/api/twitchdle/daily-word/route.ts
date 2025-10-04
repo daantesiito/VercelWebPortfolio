@@ -23,13 +23,18 @@ export async function GET(request: NextRequest) {
       ? (searchParams.get('date') as string)
       : gameDateString()
     
+    console.log('🔍 GET /api/twitchdle/daily-word:', { date })
+    
     // Buscar en la base de datos usando SQL raw
     const result = await query(
       `SELECT date, word FROM "DailyWord" WHERE date = $1 LIMIT 1`, 
       [date]
     )
     
+    console.log('🔍 Database query result:', result.rows?.length || 0, 'rows found')
+    
     if (!result.rows || result.rows.length === 0) {
+      console.log('❌ No word found for date:', date)
       return NextResponse.json(
         { error: `No daily word for date ${date}` },
         { status: 404 }
@@ -40,9 +45,12 @@ export async function GET(request: NextRequest) {
     const body = { date: row.date, word: row.word }
     const etag = makeEtag(row.date, row.word)
     
+    console.log('✅ Word found:', { date: row.date, word: row.word })
+    
     // Soportar If-None-Match para cache
     const inm = request.headers.get('if-none-match')
     if (inm && inm === etag) {
+      console.log('📦 Returning 304 - Not Modified')
       return new NextResponse(null, {
         status: 304,
         headers: {
@@ -61,7 +69,7 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error) {
-    console.error('Error en daily-word API:', error)
+    console.error('❌ Error en daily-word API:', error)
     
     // Si hay error de base de datos, devolver 503 para reintento
     if (error instanceof Error && error.message.includes('database')) {
