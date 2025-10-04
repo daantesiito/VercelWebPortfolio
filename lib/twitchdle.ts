@@ -174,11 +174,8 @@ export async function getDailyWord(date: string): Promise<string> {
       return word
     }
     
-    console.log('⚠️ No word found in DB, generating from date...')
-    // Si no existe, generar automáticamente basado en la fecha
-    const generatedWord = await generateDailyWordFromDate(date)
-    console.log('✅ Generated word:', generatedWord)
-    return generatedWord
+    console.log('⚠️ No word found in DB for date:', date)
+    throw new Error(`No se encontró palabra del día para la fecha ${date}`)
   } catch (error) {
     console.error('❌ getDailyWord error:', error)
     throw error
