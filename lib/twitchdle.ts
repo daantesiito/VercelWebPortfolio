@@ -161,20 +161,14 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
 // Obtener la palabra del día desde la base de datos
 export async function getDailyWord(date: string): Promise<string> {
   try {
-    console.log('🔍 getDailyWord called with date:', date)
-    
     // Buscar la palabra en la base de datos usando SQL raw
     const result = await query(`SELECT word FROM "DailyWord" WHERE date = $1 LIMIT 1`, [date])
     
-    console.log('🔍 DailyWord query result:', result.rows ? `${result.rows.length} rows found` : 'NO ROWS')
-    
     if (result.rows && result.rows.length > 0) {
       const word = result.rows[0].word
-      console.log('✅ Found word in DB:', word)
       return word
     }
     
-    console.log('⚠️ No word found in DB, generating from date')
     // Si no existe, generar automáticamente basado en la fecha
     const generatedWord = await generateDailyWordFromDate(date)
     return generatedWord
