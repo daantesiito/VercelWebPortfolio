@@ -9,6 +9,8 @@ declare module 'next-auth' {
       image?: string | null
       twitchId?: string
       twitchLogin?: string
+      followers?: number
+      isStreamer?: boolean
     }
   }
 
@@ -32,5 +34,10 @@ declare module 'next-auth/jwt' {
     sub: string
     twitchId?: string
     twitchLogin?: string
+    twitchAccessToken?: string
+    twitchRefreshToken?: string
+    followers?: number
+    isStreamer?: boolean
+    followersCheckedAt?: number
   }
 }
