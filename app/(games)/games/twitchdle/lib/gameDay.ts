@@ -1,24 +1,31 @@
-import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
-import { format, startOfDay } from 'date-fns';
+// Implementación simple sin dependencias externas para evitar problemas de build
+export const GAME_TZ_OFFSET = -3; // Buenos Aires es UTC-3
 
-export const GAME_TZ = 'America/Argentina/Buenos_Aires';
-
-// Devuelve un Date "zoned" (ojo: sigue siendo Date, pero pensado en TZ elegida)
-export function nowInGameTZ(base: Date = new Date()): Date {
-  return utcToZonedTime(base, GAME_TZ);
-}
-
-// "YYYY-MM-DD" del día lógico del juego en BA
+// "YYYY-MM-DD" del día lógico del juego en Buenos Aires
 export function gameDateString(base: Date = new Date()): string {
-  const zoned = nowInGameTZ(base);
-  return format(zoned, 'yyyy-MM-dd'); // format respeta el "zoned"
+  // Convertir a zona horaria de Buenos Aires (UTC-3)
+  const buenosAiresTime = new Date(base.getTime() + (GAME_TZ_OFFSET * 60 * 60 * 1000));
+  
+  // Formatear como YYYY-MM-DD
+  const year = buenosAiresTime.getUTCFullYear();
+  const month = String(buenosAiresTime.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(buenosAiresTime.getUTCDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
 }
 
-// Inicio del día (00:00) del juego en BA, en UTC (útil para DB DateTime si alguna vez lo usás)
+// Devuelve un Date "zoned" (simulado para Buenos Aires)
+export function nowInGameTZ(base: Date = new Date()): Date {
+  return new Date(base.getTime() + (GAME_TZ_OFFSET * 60 * 60 * 1000));
+}
+
+// Inicio del día (00:00) del juego en BA, en UTC
 export function gameDayStartUtc(dateStr: string): Date {
-  // convierte "YYYY-MM-DD 00:00" BA -> UTC
-  const d = zonedTimeToUtc(`${dateStr}T00:00:00`, GAME_TZ);
-  return d;
+  // Crear fecha en BA y convertir a UTC
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const baDate = new Date(year, month - 1, day, 0, 0, 0);
+  // Convertir de BA a UTC (sumar 3 horas)
+  return new Date(baDate.getTime() - (GAME_TZ_OFFSET * 60 * 60 * 1000));
 }
 
 // Por si necesitás comparar "hoy" con otra fecha "YYYY-MM-DD"
