@@ -161,21 +161,23 @@ export async function upsertTwitchdleGame(gameState: TwitchdleGameState): Promis
 // Obtener la palabra del día desde la base de datos
 export async function getDailyWord(date: string): Promise<string> {
   try {
-    console.log('🔍 getDailyWord called for date:', date)
+    console.log('🔍 getDailyWord called with date:', date)
     
     // Buscar la palabra en la base de datos usando SQL raw
     const result = await query(`SELECT word FROM "DailyWord" WHERE date = $1 LIMIT 1`, [date])
     
-    console.log('🔍 DailyWord query result:', result.rows ? `${result.rows.length} rows found` : 'no rows')
+    console.log('🔍 DailyWord query result:', result.rows ? `${result.rows.length} rows found` : 'NO ROWS')
     
     if (result.rows && result.rows.length > 0) {
       const word = result.rows[0].word
-      console.log('✅ Found existing word:', word)
+      console.log('✅ Found word in DB:', word)
       return word
     }
     
-    console.log('⚠️ No word found in DB for date:', date)
-    throw new Error(`No se encontró palabra del día para la fecha ${date}`)
+    console.log('⚠️ No word found in DB, generating from date')
+    // Si no existe, generar automáticamente basado en la fecha
+    const generatedWord = await generateDailyWordFromDate(date)
+    return generatedWord
   } catch (error) {
     console.error('❌ getDailyWord error:', error)
     throw error
@@ -185,14 +187,10 @@ export async function getDailyWord(date: string): Promise<string> {
 // Generar palabra del día basada en la fecha (selección lineal)
 async function generateDailyWordFromDate(date: string): Promise<string> {
   try {
-    console.log('🔍 generateDailyWordFromDate called for date:', date)
-    
     // Calcular días desde una fecha base (ej: 2025-01-01)
     const baseDate = new Date('2025-01-01')
     const currentDate = new Date(date)
     const daysDiff = Math.floor((currentDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24))
-    
-    console.log('🔍 Days difference from base date:', daysDiff)
     
     // Obtener todas las palabras ordenadas por fecha de creación
     const allWordsResult = await query(`
@@ -200,19 +198,13 @@ async function generateDailyWordFromDate(date: string): Promise<string> {
       ORDER BY "createdAt" ASC
     `)
     
-    console.log('🔍 All words query result:', allWordsResult.rows ? `${allWordsResult.rows.length} words found` : 'no words')
-    
     if (!allWordsResult.rows || allWordsResult.rows.length === 0) {
-      console.error('❌ No hay palabras disponibles en la base de datos')
       throw new Error('No hay palabras disponibles en la base de datos')
     }
     
     const wordList = allWordsResult.rows.map(row => row.word)
     const wordIndex = daysDiff % wordList.length
     const selectedWord = wordList[wordIndex]
-    
-    console.log('🔍 Selected word index:', wordIndex, 'from', wordList.length, 'words')
-    console.log('🔍 Selected word:', selectedWord)
     
     // Guardar la palabra seleccionada para esta fecha
     await query(`
@@ -222,7 +214,6 @@ async function generateDailyWordFromDate(date: string): Promise<string> {
       DO UPDATE SET word = $2, "updatedAt" = NOW()
     `, [date, selectedWord])
     
-    console.log('✅ Word saved to database for date:', date)
     return selectedWord
   } catch (error) {
     console.error('❌ generateDailyWordFromDate error:', error)
