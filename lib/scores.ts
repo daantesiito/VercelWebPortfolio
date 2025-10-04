@@ -11,10 +11,10 @@ export interface TopScore {
 
 export async function getTopScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
-    console.log(`🔍 getTopScores: Fetching ${limit} scores for game ${gameSlug}`);
+    //console.log(`🔍 getTopScores: Fetching ${limit} scores for game ${gameSlug}`);
     const scores = await getScores(gameSlug, limit, false)
 
-    console.log(`✅ getTopScores: Found ${scores.length} scores`);
+    //console.log(`✅ getTopScores: Found ${scores.length} scores`);
     return scores.map((score: any) => ({
       displayName: score.displayname || score.displayName || 'Anonymous',
       avatarUrl: score.avatarurl || score.avatarUrl,
@@ -30,10 +30,10 @@ export async function getTopScores(gameSlug: string, limit: number = 10): Promis
 
 export async function getTopStreamerScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
-    console.log(`🔍 getTopStreamerScores: Fetching ${limit} streamer scores for game ${gameSlug}`);
+    //console.log(`🔍 getTopStreamerScores: Fetching ${limit} streamer scores for game ${gameSlug}`);
     const scores = await getScores(gameSlug, limit, true)
 
-    console.log(`✅ getTopStreamerScores: Found ${scores.length} streamer scores`);
+    //console.log(`✅ getTopStreamerScores: Found ${scores.length} streamer scores`);
     return scores.map((score: any) => ({
       displayName: score.displayname || score.displayName || 'Anonymous',
       avatarUrl: score.avatarurl || score.avatarUrl,
@@ -50,11 +50,11 @@ export async function getTopStreamerScores(gameSlug: string, limit: number = 10)
 // Nueva función para obtener leaderboard desde TwitchdleStats
 export async function getTwitchdleLeaderboard(limit: number = 10): Promise<TopScore[]> {
   try {
-    console.log(`🔍 getTwitchdleLeaderboard: Fetching ${limit} scores from TwitchdleStats`);
+    //console.log(`🔍 getTwitchdleLeaderboard: Fetching ${limit} scores from TwitchdleStats`);
     
     // TODO: Implementar cuando se cree la tabla TwitchdleStats
     // Por ahora, devolver array vacío
-    console.log('⚠️ TwitchdleStats table not created yet, returning empty leaderboard');
+    //console.log('⚠️ TwitchdleStats table not created yet, returning empty leaderboard');
     
     return []
   } catch (error) {
@@ -78,7 +78,7 @@ export async function upsertBestScore(
   
   try {
     const result = await upsertScore(userId, gameSlug, value)
-    return { best: result.value, updated: true }
+    return { best: result.value, updated: result.is_new_record || false }
   } catch (error) {
     console.error('❌ Error upserting score:', error)
     return { best: 0, updated: false }
@@ -93,7 +93,7 @@ async function upsertTwitchdleStreak(
   const { query } = await import('./database')
   
   try {
-    console.log('🔍 upsertTwitchdleStreak called:', { userId, currentStreak })
+    //console.log('🔍 upsertTwitchdleStreak called:', { userId, currentStreak })
     
     const queryText = `
       INSERT INTO "Score" (id, "userId", "gameSlug", value, "createdAt", "updatedAt")
@@ -105,8 +105,8 @@ async function upsertTwitchdleStreak(
     `
     
     const result = await query(queryText, [userId, 'twitchdle', currentStreak])
-    console.log('✅ Twitchdle streak updated:', result.rows[0])
-    console.log('📊 Full result:', result)
+    //console.log('✅ Twitchdle streak updated:', result.rows[0])
+    //console.log('📊 Full result:', result)
     
     return { best: result.rows[0].value, updated: true }
   } catch (error) {
@@ -122,11 +122,11 @@ export function validateGameSlug(gameSlug: string): boolean {
 
 export async function getTopStreakScores(gameSlug: string, limit: number = 10): Promise<TopScore[]> {
   try {
-    console.log(`🔍 getTopStreakScores: Fetching ${limit} streak scores for game ${gameSlug}`);
+    //console.log(`🔍 getTopStreakScores: Fetching ${limit} streak scores for game ${gameSlug}`);
     const { getStreakScores } = await import('./database')
     const scores = await getStreakScores(gameSlug, limit)
 
-    console.log(`✅ getTopStreakScores: Found ${scores.length} streak scores`);
+    //console.log(`✅ getTopStreakScores: Found ${scores.length} streak scores`);
     return scores.map((score: any) => ({
       displayName: score.displayname || score.displayName || 'Anonymous',
       avatarUrl: score.avatarurl || score.avatarUrl,

@@ -92,7 +92,7 @@ export default function GameWithLeaderboard({ initialScores, initialStreamerScor
         <UserProfile />
         
         {/* Botón de guía debajo del perfil */}
-        <div style={{ position: 'fixed', top: '3vh', right: '35vh', zIndex: 100 }}>
+        <div style={{ position: 'fixed', top: '3vh', right: '35vh', zIndex: 40 }}>
           <button 
             className="instructions-toggle-button"
             onClick={() => setShowGuide(true)}

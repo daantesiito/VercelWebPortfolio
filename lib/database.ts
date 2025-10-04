@@ -109,7 +109,18 @@ export async function upsertUser(userData: {
 
 // Función para crear/actualizar score
 export async function upsertScore(userId: string, gameSlug: string, value: number) {
-  const queryText = `
+  // Primero verificar si existe un score previo
+  const checkQuery = `
+    SELECT value FROM "Score" 
+    WHERE "userId" = $1 AND "gameSlug" = $2
+  `
+  
+  const checkResult = await query(checkQuery, [userId, gameSlug])
+  const previousValue = checkResult.rows.length > 0 ? checkResult.rows[0].value : 0
+  const isNewRecord = value > previousValue
+  
+  // Ahora hacer el upsert
+  const upsertQuery = `
     INSERT INTO "Score" (id, "userId", "gameSlug", value, "createdAt", "updatedAt")
     VALUES (gen_random_uuid(), $1, $2, $3, NOW(), NOW())
     ON CONFLICT ("userId", "gameSlug") DO UPDATE SET
@@ -118,8 +129,8 @@ export async function upsertScore(userId: string, gameSlug: string, value: numbe
     RETURNING value
   `
   
-  const result = await query(queryText, [userId, gameSlug, value])
-  return result.rows[0]
+  const result = await query(upsertQuery, [userId, gameSlug, value])
+  return { value: result.rows[0].value, is_new_record: isNewRecord }
 }
 
 // Función para obtener scores de racha (streak)
