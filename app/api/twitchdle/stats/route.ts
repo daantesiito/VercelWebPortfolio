@@ -28,14 +28,6 @@ export async function POST(request: NextRequest) {
       gameDate,
     } = body
     
-    //console.log('💾 POST /api/twitchdle/stats:', { 
-      //userId: session.user.id, 
-      //gameDate,
-      //totalGames,
-      //victories,
-      //currentStreak,
-      //maxStreak
-    //})
     
     // Validar que el userId coincida con la sesión
     if (userId !== session.user.id) {
@@ -66,16 +58,10 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(processedAt || Date.now()),
     }
     
-    //console.log('✅ Stats saved to database:', {
-      //userId: next.userId,
-      //totalGames: next.totalGames,
-      //victories: next.victories,
-      //maxStreak: next.maxStreak
-    //})
     
     return NextResponse.json({ ok: true, stats: next })
   } catch (error) {
-    console.error('❌ POST /api/twitchdle/stats error:', error)
+    console.error('POST /api/twitchdle/stats error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }
@@ -101,7 +87,7 @@ export async function GET(request: NextRequest) {
       lastGameResult: null
     })
   } catch (error) {
-    console.error('❌ GET /api/twitchdle/stats error:', error)
+    console.error('GET /api/twitchdle/stats error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }
