@@ -1,0 +1,3 @@
+[submodule "public/hltvmc"]
+	path = public/hltvmc
+	url = https://github.com/tu-usuario/hltvmc
